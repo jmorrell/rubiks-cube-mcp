@@ -131,8 +131,8 @@ function RubiksCube3D({ state }: { state: CubeState }) {
   return (
     <group
       ref={groupRef}
-      // Changed rotation to better show top and bottom faces
-      rotation={[Math.PI / 3, -Math.PI / 4, 0]}
+      // Standard orientation: white on bottom, yellow on top, blue facing user
+      rotation={[Math.PI / 8, Math.PI / 8, 0]}
     >
       {positions.map((position, index) => {
         let [x, y, z] = position;
@@ -286,7 +286,7 @@ function App() {
               {isReady && (
                 <Canvas
                   camera={{
-                    position: [4, 6, 6],
+                    position: [5, 3, 7],
                     fov: 35,
                     near: 0.1,
                     far: 1000,
