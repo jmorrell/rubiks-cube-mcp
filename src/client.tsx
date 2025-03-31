@@ -242,6 +242,19 @@ function App() {
     state: initialSolvedState,
   });
 
+  // State to handle ready status
+  let [isReady, setIsReady] = useState(false);
+
+  // Set ready state after initial render
+  useEffect(() => {
+    // Small delay to ensure all layout calculations are done
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   let agent = useAgent<RubiksCubeState>({
     agent: "rubiks-cube-agent",
     prefix: "cube",
@@ -269,24 +282,30 @@ function App() {
 
         <div className="cube-and-moves">
           <div className="cube-view">
-            <Canvas
-              camera={{
-                position: [4, 6, 6],
-                fov: 35,
-                near: 0.1,
-                far: 1000,
-              }}
-              shadows
-              gl={{
-                antialias: true,
-                alpha: false,
-                logarithmicDepthBuffer: true,
-                precision: "highp",
-              }}
-              dpr={[1, 2]}
-            >
-              <Scene state={state.state} />
-            </Canvas>
+            <div className="canvas-container" style={{ width: "100%", height: "100%" }}>
+              {isReady && (
+                <Canvas
+                  camera={{
+                    position: [4, 6, 6],
+                    fov: 35,
+                    near: 0.1,
+                    far: 1000,
+                  }}
+                  shadows
+                  gl={{
+                    antialias: true,
+                    alpha: false,
+                    logarithmicDepthBuffer: true,
+                    precision: "highp",
+                  }}
+                  dpr={[1, 2]}
+                  style={{ width: "100%", height: "100%" }}
+                >
+                  <Scene state={state.state} />
+                </Canvas>
+              )}
+              {!isReady && <div className="canvas-loading" />}
+            </div>
           </div>
 
           <div className="moves-history">
