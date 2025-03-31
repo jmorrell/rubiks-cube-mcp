@@ -1,0 +1,23 @@
+{
+  "name": "rubiks-cube",
+  "main": "src/server.ts",
+  "compatibility_date": "2025-03-14",
+  "compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
+  "assets": {
+    "directory": "public"
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "RubiksCubeAgent",
+        "class_name": "RubiksCubeAgent"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["RubiksCubeAgent"]
+    }
+  ]
+}
