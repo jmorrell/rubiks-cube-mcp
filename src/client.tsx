@@ -48,39 +48,36 @@ interface CubieProps {
 function Cubie({ position, colors, size = 0.85 }: CubieProps) {
   let [x, y, z] = position;
 
-  // Increase the gap between cubies to prevent z-fighting
-  let spacing = 1.15;
-
   // Default color for empty stickers - use a dark gray instead of black
   let defaultColor = "#333";
 
   return (
-    <group position={[x * spacing, y * spacing, z * spacing]}>
+    <group position={[x, y, z]}>
       {/* Right/Left face */}
       {x === 1 && (
         <mesh position={[size / 2 + 0.001, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
           <planeGeometry args={[size * 0.95, size * 0.95]} />
-          <meshPhongMaterial color={colors.right || defaultColor} shininess={50} />
+          <meshPhongMaterial color={colors.right || defaultColor} shininess={50} side={THREE.DoubleSide} />
         </mesh>
       )}
       {x === -1 && (
         <mesh position={[-size / 2 - 0.001, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
           <planeGeometry args={[size * 0.95, size * 0.95]} />
-          <meshPhongMaterial color={colors.left || defaultColor} shininess={50} />
+          <meshPhongMaterial color={colors.left || defaultColor} shininess={50} side={THREE.DoubleSide} />
         </mesh>
       )}
 
-      {/* Up/Down face */}
+      {/* Up/Down face - increased offset to ensure visibility */}
       {y === 1 && (
-        <mesh position={[0, size / 2 + 0.001, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <mesh position={[0, size / 2 + 0.002, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <planeGeometry args={[size * 0.95, size * 0.95]} />
-          <meshPhongMaterial color={colors.up || defaultColor} shininess={50} />
+          <meshPhongMaterial color={colors.up || defaultColor} shininess={50} side={THREE.DoubleSide} />
         </mesh>
       )}
       {y === -1 && (
-        <mesh position={[0, -size / 2 - 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <mesh position={[0, -size / 2 - 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[size * 0.95, size * 0.95]} />
-          <meshPhongMaterial color={colors.down || defaultColor} shininess={50} />
+          <meshPhongMaterial color={colors.down || defaultColor} shininess={50} side={THREE.DoubleSide} />
         </mesh>
       )}
 
@@ -88,13 +85,13 @@ function Cubie({ position, colors, size = 0.85 }: CubieProps) {
       {z === 1 && (
         <mesh position={[0, 0, size / 2 + 0.001]}>
           <planeGeometry args={[size * 0.95, size * 0.95]} />
-          <meshPhongMaterial color={colors.front || defaultColor} shininess={50} />
+          <meshPhongMaterial color={colors.front || defaultColor} shininess={50} side={THREE.DoubleSide} />
         </mesh>
       )}
       {z === -1 && (
         <mesh position={[0, 0, -size / 2 - 0.001]} rotation={[0, Math.PI, 0]}>
           <planeGeometry args={[size * 0.95, size * 0.95]} />
-          <meshPhongMaterial color={colors.back || defaultColor} shininess={50} />
+          <meshPhongMaterial color={colors.back || defaultColor} shininess={50} side={THREE.DoubleSide} />
         </mesh>
       )}
 
@@ -132,7 +129,11 @@ function RubiksCube3D({ state }: { state: CubeState }) {
   }
 
   return (
-    <group ref={groupRef} rotation={[Math.PI / 6, -Math.PI / 3, 0]}>
+    <group
+      ref={groupRef}
+      // Changed rotation to better show top and bottom faces
+      rotation={[Math.PI / 3, -Math.PI / 4, 0]}
+    >
       {positions.map((position, index) => {
         let [x, y, z] = position;
         let colors: Record<string, string> = {};
@@ -202,17 +203,23 @@ function Scene({ state }: { state: CubeState }) {
   return (
     <>
       <color attach="background" args={["#222"]} />
-      <ambientLight intensity={0.6} />
-      <hemisphereLight args={["#888", "#222"]} intensity={0.5} />
+      <ambientLight intensity={0.7} />
+      <hemisphereLight args={["#fff", "#444"]} intensity={0.6} />
 
-      {/* Main key light */}
+      {/* Main key light from top-right */}
       <directionalLight position={[5, 10, 5]} intensity={0.8} castShadow />
 
-      {/* Fill light for bottom */}
-      <directionalLight position={[-5, -8, 5]} intensity={0.6} />
+      {/* Strong fill light for bottom face */}
+      <directionalLight position={[-3, -10, 5]} intensity={0.7} />
 
       {/* Back light */}
-      <directionalLight position={[0, 5, -10]} intensity={0.4} />
+      <directionalLight position={[0, 5, -10]} intensity={0.5} />
+
+      {/* Additional top light */}
+      <pointLight position={[0, 10, 0]} intensity={0.5} distance={15} />
+
+      {/* Additional bottom light */}
+      <pointLight position={[0, -10, 0]} intensity={0.5} distance={15} />
 
       <RubiksCube3D state={state} />
       <OrbitControls
@@ -264,7 +271,7 @@ function App() {
           <div className="cube-view">
             <Canvas
               camera={{
-                position: [4, 5, 6],
+                position: [4, 6, 6],
                 fov: 35,
                 near: 0.1,
                 far: 1000,
