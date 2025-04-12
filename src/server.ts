@@ -272,7 +272,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
             points="${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}" 
             fill="${colorMap[state.state.U[row][col]]}" 
             stroke="black" 
-            stroke-width="1"
+            stroke-width="3"
             style="filter:url(#top-lighting)"
           />
         `;
@@ -301,7 +301,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
             points="${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}" 
             fill="${colorMap[state.state.F[row][col]]}" 
             stroke="black" 
-            stroke-width="1"
+            stroke-width="3"
             style="filter:url(#front-lighting)"
           />
         `;
@@ -330,7 +330,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
             points="${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}" 
             fill="${colorMap[state.state.R[row][col]]}" 
             stroke="black" 
-            stroke-width="1"
+            stroke-width="3"
             style="filter:url(#right-lighting)"
           />
         `;
