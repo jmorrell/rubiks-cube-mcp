@@ -220,26 +220,6 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
     // Start building SVG content with filters for lighting effects
     let svgContent = `
       <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="top-lighting">
-            <feColorMatrix type="matrix" values="1 0 0 0 0.1
-                                                 0 1 0 0 0.1
-                                                 0 0 1 0 0.1
-                                                 0 0 0 1 0" />
-          </filter>
-          <filter id="front-lighting">
-            <feColorMatrix type="matrix" values="1 0 0 0 -0.05
-                                                 0 1 0 0 -0.05
-                                                 0 0 1 0 -0.05
-                                                 0 0 0 1 0" />
-          </filter>
-          <filter id="right-lighting">
-            <feColorMatrix type="matrix" values="1 0 0 0 -0.1
-                                                 0 1 0 0 -0.1
-                                                 0 0 1 0 -0.1
-                                                 0 0 0 1 0" />
-          </filter>
-        </defs>
         <rect width="${width}" height="${height}" fill="#222" />
     `;
 
