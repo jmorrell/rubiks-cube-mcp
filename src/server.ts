@@ -378,13 +378,13 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
       <text x="${downCenter[0]}" y="${downCenter[1]}" font-family="sans-serif" font-size="16" fill="black" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="white" stroke-width="0.5" paint-order="stroke fill">D</text>
     `;
 
-    // Draw the back face (B) - using Front face logic
-    svgContent += `<g id="back-face">`;
+    // Draw the left face (L) - using Front face logic
+    svgContent += `<g id="left-face">`;
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
-        const x = (col - 1) / 3; // Same x mapping as Front face
+        const x = (1 - col) / 3; // Reversed x mapping
         const y = (1 - row) / 3; // Same y mapping as Front face
-        const z = -0.5; // Back face coordinate
+        const z = -0.5; // Back face coordinate (position where L is drawn)
 
         const p1 = project(x - 1 / 6, y - 1 / 6, z, centerX2, centerY2);
         const p2 = project(x + 1 / 6, y - 1 / 6, z, centerX2, centerY2);
@@ -394,7 +394,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
         svgContent += `
           <polygon 
             points="${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}" 
-            fill="${colorMap[state.state.B[row][col]]}" 
+            fill="${colorMap[state.state.L[row][col]]}" 
             stroke="black" 
             stroke-width="3"
           />
@@ -409,13 +409,13 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
       <text x="${backCenter[0]}" y="${backCenter[1]}" font-family="sans-serif" font-size="16" fill="white" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="0.5" paint-order="stroke fill">B</text>
     `;
 
-    // Draw the left face (L) - using Right face logic
-    svgContent += `<g id="left-face">`;
+    // Draw the back face (B) - using Right face logic
+    svgContent += `<g id="back-face">`;
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
-        const x = -0.5; // Left face coordinate
+        const x = -0.5; // Left face coordinate (position where B is drawn)
         const y = (1 - row) / 3; // Same y mapping as Right face
-        const z = (col - 1) / 3; // Same z mapping as Right face
+        const z = (1 - col) / 3; // Reversed z mapping
 
         const p1 = project(x, y - 1 / 6, z - 1 / 6, centerX2, centerY2);
         const p2 = project(x, y - 1 / 6, z + 1 / 6, centerX2, centerY2);
@@ -425,7 +425,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
         svgContent += `
           <polygon 
             points="${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}" 
-            fill="${colorMap[state.state.L[row][col]]}" 
+            fill="${colorMap[state.state.B[row][col]]}" 
             stroke="black" 
             stroke-width="3"
           />
