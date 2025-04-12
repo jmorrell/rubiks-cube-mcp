@@ -260,6 +260,12 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
     }
     svgContent += `</g>`;
 
+    // Add label for Top face
+    const topCenter = project(0, 0.5, 0);
+    svgContent += `
+      <text x="${topCenter[0]}" y="${topCenter[1]}" font-family="sans-serif" font-size="16" fill="white" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="2" paint-order="stroke fill">U</text>
+    `;
+
     // Draw the front face (F)
     svgContent += `<g id="front-face">`;
     for (let row = 0; row < 3; row++) {
@@ -289,6 +295,12 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
     }
     svgContent += `</g>`;
 
+    // Add label for Front face
+    const frontCenter = project(0, 0, 0.5);
+    svgContent += `
+      <text x="${frontCenter[0]}" y="${frontCenter[1]}" font-family="sans-serif" font-size="16" fill="white" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="0.5" paint-order="stroke fill">F</text>
+    `;
+
     // Draw the right face (R)
     svgContent += `<g id="right-face">`;
     for (let row = 0; row < 3; row++) {
@@ -317,6 +329,12 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
       }
     }
     svgContent += `</g>`;
+
+    // Add label for Right face
+    const rightCenter = project(0.5, 0, 0);
+    svgContent += `
+      <text x="${rightCenter[0]}" y="${rightCenter[1]}" font-family="sans-serif" font-size="16" fill="white" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="0.5" paint-order="stroke fill">R</text>
+    `;
 
     // Close the SVG
     svgContent += `</svg>`;
