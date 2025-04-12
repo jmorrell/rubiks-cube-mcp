@@ -190,33 +190,33 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
     // Get the cube agent with that ID
     const cubeAgent = await getAgentByName(env.RubiksCubeAgent, cubeId);
     const state = await cubeAgent.getCubeState();
-    
+
     // Define colors for the faces - matching with the client's colorMap
     const colorMap: Record<string, string> = {
-      "W": "#FFFFFF", // White
-      "Y": "#FFFF00", // Yellow
-      "B": "#0000FF", // Blue
-      "G": "#00FF00", // Green
-      "R": "#FF0000", // Red
-      "O": "#FFA500", // Orange
+      W: "#FFFFFF", // White
+      Y: "#FFFF00", // Yellow
+      B: "#0000FF", // Blue
+      G: "#00FF00", // Green
+      R: "#FF0000", // Red
+      O: "#FFA500", // Orange
     };
-    
+
     // SVG will use filters instead of explicit shadows
-    
+
     // SVG dimensions
-    const width = 400;
-    const height = 400;
-    
+    const width = 300;
+    const height = 300;
+
     // Isometric projection constants
     const cubeSize = 120;
     const centerX = width / 2;
     const centerY = height / 2;
-    
+
     // Calculate coordinates for isometric projection
     // 30 degree isometric angles
     const cos30 = Math.cos(Math.PI / 6);
     const sin30 = Math.sin(Math.PI / 6);
-    
+
     // Start building SVG content with filters for lighting effects
     let svgContent = `
       <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
@@ -242,7 +242,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
         </defs>
         <rect width="${width}" height="${height}" fill="#222" />
     `;
-    
+
     // Helper function to project 3D point to 2D
     function project(x: number, y: number, z: number): [number, number] {
       // Isometric projection
@@ -250,22 +250,22 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
       const projY = centerY + ((x + z) * sin30 - y) * cubeSize;
       return [projX, projY];
     }
-    
+
     // Draw the top face (U)
     svgContent += `<g id="top-face">`;
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
         // Convert row/col to 3D coordinates (x, y, z)
         const x = (col - 1) / 3;
-        const y = 1/3;
+        const y = 0.5;
         const z = (1 - row) / 3;
-        
+
         // Calculate four corners of the sticker in isometric projection
-        const p1 = project(x - 1/6, y, z - 1/6);
-        const p2 = project(x + 1/6, y, z - 1/6);
-        const p3 = project(x + 1/6, y, z + 1/6);
-        const p4 = project(x - 1/6, y, z + 1/6);
-        
+        const p1 = project(x - 1 / 6, y, z - 1 / 6);
+        const p2 = project(x + 1 / 6, y, z - 1 / 6);
+        const p3 = project(x + 1 / 6, y, z + 1 / 6);
+        const p4 = project(x - 1 / 6, y, z + 1 / 6);
+
         // Create a polygon for the sticker
         svgContent += `
           <polygon 
@@ -279,7 +279,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
       }
     }
     svgContent += `</g>`;
-    
+
     // Draw the front face (F)
     svgContent += `<g id="front-face">`;
     for (let row = 0; row < 3; row++) {
@@ -287,14 +287,14 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
         // Convert row/col to 3D coordinates (x, y, z)
         const x = (col - 1) / 3;
         const y = (1 - row) / 3;
-        const z = 1/3;
-        
+        const z = 0.5;
+
         // Calculate four corners of the sticker in isometric projection
-        const p1 = project(x - 1/6, y - 1/6, z);
-        const p2 = project(x + 1/6, y - 1/6, z);
-        const p3 = project(x + 1/6, y + 1/6, z);
-        const p4 = project(x - 1/6, y + 1/6, z);
-        
+        const p1 = project(x - 1 / 6, y - 1 / 6, z);
+        const p2 = project(x + 1 / 6, y - 1 / 6, z);
+        const p3 = project(x + 1 / 6, y + 1 / 6, z);
+        const p4 = project(x - 1 / 6, y + 1 / 6, z);
+
         // Create a polygon for the sticker
         svgContent += `
           <polygon 
@@ -308,22 +308,22 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
       }
     }
     svgContent += `</g>`;
-    
+
     // Draw the right face (R)
     svgContent += `<g id="right-face">`;
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
         // Convert row/col to 3D coordinates (x, y, z)
-        const x = 1/3;
+        const x = 0.5;
         const y = (1 - row) / 3;
         const z = (col - 1) / 3;
-        
+
         // Calculate four corners of the sticker in isometric projection
-        const p1 = project(x, y - 1/6, z - 1/6);
-        const p2 = project(x, y - 1/6, z + 1/6);
-        const p3 = project(x, y + 1/6, z + 1/6);
-        const p4 = project(x, y + 1/6, z - 1/6);
-        
+        const p1 = project(x, y - 1 / 6, z - 1 / 6);
+        const p2 = project(x, y - 1 / 6, z + 1 / 6);
+        const p3 = project(x, y + 1 / 6, z + 1 / 6);
+        const p4 = project(x, y + 1 / 6, z - 1 / 6);
+
         // Create a polygon for the sticker
         svgContent += `
           <polygon 
@@ -337,10 +337,10 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
       }
     }
     svgContent += `</g>`;
-    
+
     // Close the SVG
     svgContent += `</svg>`;
-    
+
     // Return the SVG as a response
     return new Response(svgContent, {
       headers: {
