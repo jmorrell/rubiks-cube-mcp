@@ -236,6 +236,13 @@ function Scene({ state }: { state: CubeState }) {
 }
 
 function App() {
+  // Read the url to get the cube id that we will sync
+  let pathname = window.location.pathname;
+  let id = pathname.startsWith("/") ? pathname.slice(1) : pathname;
+  if (id === "") {
+    id = "default";
+  }
+
   let [state, setState] = useState<RubiksCubeState>({
     moveHistory: [],
     isSolved: true,
@@ -258,6 +265,7 @@ function App() {
   let agent = useAgent<RubiksCubeState>({
     agent: "rubiks-cube-agent",
     prefix: "cube",
+    name: id,
     onStateUpdate: (state) => {
       setState(state);
     },
@@ -272,7 +280,7 @@ function App() {
   };
 
   let handleScramble = async () => {
-    await agent.call("scramble", [20]);
+    await agent.call("scramble", [1]);
   };
 
   return (

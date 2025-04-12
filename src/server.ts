@@ -4,6 +4,9 @@ import type { CubeState } from "./rubiksCube";
 
 type Env = {
   RubiksCube: AgentNamespace<RubiksCubeAgent>;
+  ASSETS: {
+    fetch(request: Request): Promise<Response>;
+  };
 };
 
 export type RubiksCubeState = {
@@ -30,7 +33,7 @@ export class RubiksCubeAgent extends Agent<Env, RubiksCubeState> {
   }
 
   @callable()
-  async applyMoveSequence(sequence: string) {
+  applyMoveSequence(sequence: string) {
     let cube = this.#getCurrentCube();
     cube.applyMoveSequence(sequence);
 
@@ -43,8 +46,20 @@ export class RubiksCubeAgent extends Agent<Env, RubiksCubeState> {
     return this.state;
   }
 
-  async getCubeState() {
+  @callable()
+  previewResult(sequence: string) {
     let cube = this.#getCurrentCube();
+    cube.applyMoveSequence(sequence);
+
+    return {
+      moveHistory: [...cube.getMoveHistory()],
+      isSolved: cube.isSolved(),
+      state: cube.getCurrentState(),
+    };
+  }
+
+  @callable()
+  getCubeState() {
     return this.state;
   }
 
@@ -60,10 +75,10 @@ export class RubiksCubeAgent extends Agent<Env, RubiksCubeState> {
 
   @callable()
   async scramble(numMoves: number = 25) {
-    let cube = this.#getCurrentCube();
+    let cube = new RubiksCube();
     cube.scramble(numMoves);
     this.setState({
-      moveHistory: [...cube.getMoveHistory()],
+      moveHistory: [],
       isSolved: cube.isSolved(),
       state: cube.getCurrentState(),
     });
@@ -73,6 +88,9 @@ export class RubiksCubeAgent extends Agent<Env, RubiksCubeState> {
 
 export default {
   async fetch(request: Request, env: Env) {
-    return (await routeAgentRequest(request, env, { prefix: "cube" })) || new Response("Not found", { status: 404 });
+    if (request.url.includes("/cube")) {
+      return (await routeAgentRequest(request, env, { prefix: "cube" })) || new Response("Not found", { status: 404 });
+    }
+    return env.ASSETS.fetch(request);
   },
 } satisfies ExportedHandler<Env>;
