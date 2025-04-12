@@ -14,13 +14,17 @@
       {
         "name": "RubiksCubeAgent",
         "class_name": "RubiksCubeAgent"
+      },
+      {
+        "class_name": "RubiksCubeMCP",
+        "name": "RubiksCubeMCP"
       }
     ]
   },
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlite_classes": ["RubiksCubeAgent"]
+      "new_sqlite_classes": ["RubiksCubeAgent", "RubiksCubeMCP"]
     }
   ]
 }

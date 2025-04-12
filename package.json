@@ -11,11 +11,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.9.0",
     "@react-three/drei": "^10.0.5",
     "@react-three/fiber": "^9.1.0",
     "@types/three": "^0.175.0",
     "agents": "^0.0.45",
-    "three": "^0.175.0"
+    "dedent": "^1.5.3",
+    "three": "^0.175.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "0.1.19",
