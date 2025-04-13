@@ -246,30 +246,13 @@ export class RubiksCube {
   scramble(numMoves: number = 25): void {
     this.reset(); // Start from a solved state for scrambling
 
-    const faces = Object.keys(this.initialState) as Face[];
+    const faces = ["U", "R", "F", "D", "L", "B"] as Face[];
     const modifiers = ["", "'", "2"];
     let lastFace: Face | null = null;
     const randomMoves: string[] = [];
 
     for (let i = 0; i < numMoves; i++) {
-      let randomFace: Face;
-      // Avoid redundant moves like R L R or R R'
-      let potentialFace: Face;
-      do {
-        potentialFace = faces[Math.floor(Math.random() * faces.length)];
-        // Prevent immediate inverse face (e.g. R then L) - less common but good practice
-        // Prevent same face twice in a row (e.g. R then R') - more important
-      } while (
-        potentialFace === lastFace ||
-        (lastFace === "R" && potentialFace === "L") ||
-        (lastFace === "L" && potentialFace === "R") ||
-        (lastFace === "U" && potentialFace === "D") ||
-        (lastFace === "D" && potentialFace === "U") ||
-        (lastFace === "F" && potentialFace === "B") ||
-        (lastFace === "B" && potentialFace === "F")
-      );
-
-      randomFace = potentialFace;
+      const randomFace: Face = faces[Math.floor(Math.random() * faces.length)];
       const randomModifier = modifiers[Math.floor(Math.random() * modifiers.length)];
       randomMoves.push(`${randomFace}${randomModifier}`);
       lastFace = randomFace;

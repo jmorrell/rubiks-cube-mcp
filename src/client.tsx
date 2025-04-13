@@ -272,7 +272,7 @@ function App() {
   };
 
   let handleScramble = async () => {
-    await agent.call("scramble", [1]);
+    await agent.call("scramble", [2]);
   };
 
   return (

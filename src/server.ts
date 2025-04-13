@@ -79,7 +79,7 @@ export class RubiksCubeAgent extends Agent<Env, RubiksCubeState> {
   }
 
   @callable()
-  async scramble(numMoves: number = 25) {
+  async scramble(numMoves: number = 2) {
     let cube = new RubiksCube();
     cube.scramble(numMoves);
     this.setState({
