@@ -261,7 +261,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
         // Convert row/col to 3D coordinates (x, y, z)
         const x = (col - 1) / 3;
         const y = 0.5;
-        const z = (1 - row) / 3;
+        const z = (row - 1) / 3;
 
         // Calculate four corners of the sticker in isometric projection
         const p1 = project(x - 1 / 6, y, z - 1 / 6, centerX1, centerY1);
@@ -331,7 +331,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
         // Convert row/col to 3D coordinates (x, y, z)
         const x = 0.5;
         const y = (1 - row) / 3;
-        const z = (col - 1) / 3;
+        const z = (1 - col) / 3;
 
         // Calculate four corners of the sticker in isometric projection
         const p1_r = project(x, y - 1 / 6, z - 1 / 6, centerX1, centerY1);
@@ -368,9 +368,9 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
     svgContent += `<g id="down-face">`;
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
-        const x = (row - 1) / 3; // Map row to x (Re-corrected)
-        const y = -0.5; // Down face coordinate
-        const z = (col - 1) / 3; // Map col to z (Re-corrected)
+        const x = (1 - row) / 3;
+        const y = -0.5;
+        const z = (col - 1) / 3;
 
         const p1 = project(x - 1 / 6, y, z - 1 / 6, centerX2, centerY2);
         const p2 = project(x + 1 / 6, y, z - 1 / 6, centerX2, centerY2);
@@ -399,9 +399,9 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
     svgContent += `<g id="left-face">`;
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
-        const x = (1 - col) / 3; // Reversed x mapping
-        const y = (1 - row) / 3; // Same y mapping as Front face
-        const z = -0.5; // Back face coordinate (position where L is drawn)
+        const x = (col - 1) / 3;
+        const y = (1 - row) / 3;
+        const z = -0.5;
 
         const p1 = project(x - 1 / 6, y - 1 / 6, z, centerX2, centerY2);
         const p2 = project(x + 1 / 6, y - 1 / 6, z, centerX2, centerY2);
@@ -423,7 +423,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
     // Add label for Back face
     const backCenter = project(0, 0, -0.5, centerX2, centerY2);
     svgContent += `
-      <text x="${backCenter[0]}" y="${backCenter[1]}" font-family="sans-serif" font-size="16" fill="white" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="2" paint-order="stroke fill">B</text>
+      <text x="${backCenter[0]}" y="${backCenter[1]}" font-family="sans-serif" font-size="16" fill="white" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="2" paint-order="stroke fill">L</text>
     `;
 
     // Draw the back face (B) - using Right face logic
@@ -454,7 +454,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
     // Add label for Left face
     const leftCenter = project(-0.5, 0, 0, centerX2, centerY2);
     svgContent += `
-      <text x="${leftCenter[0]}" y="${leftCenter[1]}" font-family="sans-serif" font-size="16" fill="white" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="2" paint-order="stroke fill">L</text>
+      <text x="${leftCenter[0]}" y="${leftCenter[1]}" font-family="sans-serif" font-size="16" fill="white" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="2" paint-order="stroke fill">B</text>
     `;
 
     svgContent += `</g>`; // Close cube2 group

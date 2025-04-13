@@ -126,7 +126,7 @@ function RubiksCube3D({ state }: { state: Cube }) {
 
         // Top face (yellow) - U
         if (y === 1) {
-          let row = 1 - z;
+          let row = 1 + z;
           let col = 1 + x;
           if (row >= 0 && row < 3 && col >= 0 && col < 3) {
             // Calculate 1-based index for S function
@@ -136,7 +136,7 @@ function RubiksCube3D({ state }: { state: Cube }) {
 
         // Bottom face (white) - D
         if (y === -1) {
-          let row = 1 + z;
+          let row = 1 - z;
           let col = 1 + x;
           if (row >= 0 && row < 3 && col >= 0 && col < 3) {
             // Calculate 1-based index for S function
@@ -167,7 +167,7 @@ function RubiksCube3D({ state }: { state: Cube }) {
         // Left face (orange) - L
         if (x === -1) {
           let row = 1 - y;
-          let col = 1 - z;
+          let col = 1 + z;
           if (row >= 0 && row < 3 && col >= 0 && col < 3) {
             // Calculate 1-based index for S function
             colors.left = getColor(state[S("L", row * 3 + col + 1)]);
@@ -177,7 +177,7 @@ function RubiksCube3D({ state }: { state: Cube }) {
         // Right face (red) - R
         if (x === 1) {
           let row = 1 - y;
-          let col = 1 + z;
+          let col = 1 - z;
           if (row >= 0 && row < 3 && col >= 0 && col < 3) {
             // Calculate 1-based index for S function
             colors.right = getColor(state[S("R", row * 3 + col + 1)]);
