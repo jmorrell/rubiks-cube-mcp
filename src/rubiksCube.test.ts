@@ -1,6 +1,5 @@
 import { RubiksCube } from "./rubiksCube";
-import type { CubeState, Face, Color } from "./rubiksCube";
-import { deepStrictEqual } from "assert"; // Using Node's assert for deep comparison
+import type { Face } from "./rubiksCube";
 
 // Helper for cleaner tests
 function assertCubeIsSolved(cube: RubiksCube, message?: string) {
@@ -215,29 +214,79 @@ describe("RubiksCube", () => {
     });
   });
 
-  // test("performing the sequence R U R' U' 3 times should put the cube into a known scrambled state", () => {
-  //   const sequence = "R U R' U'";
-  //   for (let i = 0; i < 6; i++) {
-  //     cube.applyMoveSequence(sequence);
-  //   }
+  test("performing the sequence R U R' U' 3 times should put the cube into a known scrambled state", () => {
+    const sequence = "R U R' U'";
+    for (let i = 0; i < 3; i++) {
+      cube.applyMoveSequence(sequence);
+    }
 
-  //   let state = cube.getCurrentState();
-  //   expect(state.F[0][0]).toBe(COLORS.BLUE);
-  //   expect(state.F[0][1]).toBe(COLORS.BLUE);
-  //   expect(state.F[0][2]).toBe(COLORS.RED);
+    expect(cube.getStickerAt("U", 1)).toBe("G");
+    expect(cube.getStickerAt("U", 2)).toBe("Y");
+    expect(cube.getStickerAt("U", 3)).toBe("G");
+    expect(cube.getStickerAt("U", 4)).toBe("Y");
+    expect(cube.getStickerAt("U", 5)).toBe("Y");
+    expect(cube.getStickerAt("U", 6)).toBe("Y");
+    expect(cube.getStickerAt("U", 7)).toBe("Y");
+    expect(cube.getStickerAt("U", 8)).toBe("Y");
+    expect(cube.getStickerAt("U", 9)).toBe("W");
 
-  //   expect(state.R[0][0]).toBe(COLORS.BLUE);
-  //   expect(state.R[0][1]).toBe(COLORS.RED);
-  //   expect(state.R[0][2]).toBe(COLORS.ORANGE);
+    expect(cube.getStickerAt("F", 1)).toBe("B");
+    expect(cube.getStickerAt("F", 2)).toBe("B");
+    expect(cube.getStickerAt("F", 3)).toBe("R");
+    expect(cube.getStickerAt("F", 4)).toBe("B");
+    expect(cube.getStickerAt("F", 5)).toBe("B");
+    expect(cube.getStickerAt("F", 6)).toBe("B");
+    expect(cube.getStickerAt("F", 7)).toBe("B");
+    expect(cube.getStickerAt("F", 8)).toBe("B");
+    expect(cube.getStickerAt("F", 9)).toBe("R");
 
-  //   expect(state.U[2][0]).toBe(COLORS.YELLOW);
-  //   expect(state.U[2][1]).toBe(COLORS.YELLOW);
-  //   expect(state.U[2][2]).toBe(COLORS.WHITE);
+    expect(cube.getStickerAt("R", 1)).toBe("B");
+    expect(cube.getStickerAt("R", 2)).toBe("R");
+    expect(cube.getStickerAt("R", 3)).toBe("O");
+    expect(cube.getStickerAt("R", 4)).toBe("R");
+    expect(cube.getStickerAt("R", 5)).toBe("R");
+    expect(cube.getStickerAt("R", 6)).toBe("R");
+    expect(cube.getStickerAt("R", 7)).toBe("B");
+    expect(cube.getStickerAt("R", 8)).toBe("R");
+    expect(cube.getStickerAt("R", 9)).toBe("R");
+  });
 
-  //   expect(state.U[0][2]).toBe(COLORS.WHITE);
-  //   expect(state.U[1][2]).toBe(COLORS.YELLOW);
-  //   expect(state.U[2][2]).toBe(COLORS.GREEN);
-  // });
+  test("performing the sequence L D L' D' 3 times should put the cube into a known scrambled state", () => {
+    const sequence = "L D L' D'";
+    for (let i = 0; i < 3; i++) {
+      cube.applyMoveSequence(sequence);
+    }
+
+    expect(cube.getStickerAt("D", 1)).toBe("Y");
+    expect(cube.getStickerAt("D", 2)).toBe("W");
+    expect(cube.getStickerAt("D", 3)).toBe("W");
+    expect(cube.getStickerAt("D", 4)).toBe("W");
+    expect(cube.getStickerAt("D", 5)).toBe("W");
+    expect(cube.getStickerAt("D", 6)).toBe("W");
+    expect(cube.getStickerAt("D", 7)).toBe("G");
+    expect(cube.getStickerAt("D", 8)).toBe("W");
+    expect(cube.getStickerAt("D", 9)).toBe("G");
+
+    expect(cube.getStickerAt("L", 1)).toBe("O");
+    expect(cube.getStickerAt("L", 2)).toBe("O");
+    expect(cube.getStickerAt("L", 3)).toBe("B");
+    expect(cube.getStickerAt("L", 4)).toBe("O");
+    expect(cube.getStickerAt("L", 5)).toBe("O");
+    expect(cube.getStickerAt("L", 6)).toBe("O");
+    expect(cube.getStickerAt("L", 7)).toBe("R");
+    expect(cube.getStickerAt("L", 8)).toBe("O");
+    expect(cube.getStickerAt("L", 9)).toBe("B");
+
+    expect(cube.getStickerAt("F", 1)).toBe("O");
+    expect(cube.getStickerAt("F", 2)).toBe("B");
+    expect(cube.getStickerAt("F", 3)).toBe("B");
+    expect(cube.getStickerAt("F", 4)).toBe("B");
+    expect(cube.getStickerAt("F", 5)).toBe("B");
+    expect(cube.getStickerAt("F", 6)).toBe("B");
+    expect(cube.getStickerAt("F", 7)).toBe("O");
+    expect(cube.getStickerAt("F", 8)).toBe("B");
+    expect(cube.getStickerAt("F", 9)).toBe("B");
+  });
 
   test("performing the sequence R U R' U' 6 times should return to solved state", () => {
     const sequence = "R U R' U'";
