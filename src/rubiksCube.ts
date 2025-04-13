@@ -1,32 +1,128 @@
 // rubiksCube.ts
-// Custom deep comparison function instead of using node:assert
-function deepStrictEqual(obj1: any, obj2: any): boolean {
-  if (obj1 === obj2) return true;
-
-  if (typeof obj1 !== "object" || obj1 === null || typeof obj2 !== "object" || obj2 === null) {
-    return false;
-  }
-
-  let keys1 = Object.keys(obj1);
-  let keys2 = Object.keys(obj2);
-
-  if (keys1.length !== keys2.length) return false;
-
-  for (let key of keys1) {
-    if (!keys2.includes(key)) return false;
-    if (!deepStrictEqual(obj1[key], obj2[key])) return false;
-  }
-
-  return true;
-}
-
-// --- Constants ---
 
 export type Color = "W" | "Y" | "B" | "G" | "R" | "O"; // White, Yellow, Blue, Green, Red, Orange
 export type Face = "U" | "D" | "F" | "B" | "L" | "R"; // Up, Down, Front, Back, Left, Right
 
 export type Sticker = Color;
-export type FaceState = Sticker[][]; // 3x3 array of stickers
+export type FaceState = Sticker[]; // array of stickers
+
+// A cube is an array of 9 * 6 = 54 stickers
+// The order is [U, R, F, D, L, B]
+export type Cube = Sticker[];
+
+function map_face_to_initial_sticker(face: Face): Sticker {
+  switch (face) {
+    case "U":
+      return COLORS.YELLOW;
+    case "D":
+      return COLORS.WHITE;
+    case "F":
+      return COLORS.BLUE;
+    case "B":
+      return COLORS.GREEN;
+    case "L":
+      return COLORS.ORANGE;
+    case "R":
+      return COLORS.RED;
+  }
+}
+
+let solved_cube: Cube = (["U", "R", "F", "D", "L", "B"] as Face[])
+  .map((s) => map_face_to_initial_sticker(s).repeat(9))
+  .flat() as Cube;
+
+// S(F, 4) will refer to the 4th facelet on the F face (FL), counting from top to bottom, left to right
+// The mapping assumes the cube is "unrolled" with the Front face (F) towards you:
+//
+//                 +--+--+--+
+//                 |U1|U2|U3|
+//                 +--+--+--+
+//                 |U4|U5|U6|
+//                 +--+--+--+
+//                 |U7|U8|U9|
+//      +--+--+--+ |--+--+--| |--+--+--| |--+--+--|
+//      |L1|L2|L3| |F1|F2|F3| |R1|R2|R3| |B1|B2|B3|
+//      +--+--+--+ |--+--+--| |--+--+--| |--+--+--|
+//      |L4|L5|L6| |F4|F5|F6| |R4|R5|R6| |B4|B5|B6|
+//      +--+--+--+ |--+--+--| |--+--+--| |--+--+--|
+//      |L7|L8|L9| |F7|F8|F9| |R7|R8|R9| |B7|B8|B9|
+//      +--+--+--+ |--+--+--| |--+--+--| |--+--+--|
+//                 |D1|D2|D3|
+//                 +--+--+--+
+//                 |D4|D5|D6|
+//                 +--+--+--+
+//                 |D7|D8|D9|
+//                 +--+--+--+
+function S(f: Face, i: number): number {
+  return "URFDLB".indexOf(f) * 9 + i - 1;
+}
+
+function perm_from_cycle(cycle: number[]) {
+  let perms = [];
+  for (let i = 0; i < cycle.length - 1; i++) {
+    perms.push([cycle[i], cycle[i + 1]]);
+  }
+  perms.push([cycle[cycle.length - 1], cycle[0]]);
+  return perms;
+}
+
+const u_move = [
+  perm_from_cycle([S("U", 1), S("U", 3), S("U", 9), S("U", 7)]),
+  perm_from_cycle([S("U", 2), S("U", 6), S("U", 8), S("U", 4)]),
+  perm_from_cycle([S("F", 1), S("L", 1), S("B", 1), S("R", 1)]),
+  perm_from_cycle([S("F", 2), S("L", 2), S("B", 2), S("R", 2)]),
+  perm_from_cycle([S("F", 3), S("L", 3), S("B", 3), S("R", 3)]),
+].flat();
+
+const r_move = [
+  perm_from_cycle([S("R", 1), S("R", 3), S("R", 9), S("R", 7)]),
+  perm_from_cycle([S("R", 2), S("R", 6), S("R", 8), S("R", 4)]),
+  perm_from_cycle([S("U", 9), S("B", 1), S("D", 9), S("F", 9)]),
+  perm_from_cycle([S("U", 6), S("B", 4), S("D", 6), S("F", 6)]),
+  perm_from_cycle([S("U", 3), S("B", 7), S("D", 3), S("F", 3)]),
+].flat();
+
+const f_move = [
+  perm_from_cycle([S("F", 1), S("F", 3), S("F", 9), S("F", 7)]),
+  perm_from_cycle([S("F", 2), S("F", 6), S("F", 8), S("F", 4)]),
+  perm_from_cycle([S("U", 7), S("R", 1), S("D", 3), S("L", 9)]),
+  perm_from_cycle([S("U", 8), S("R", 4), S("D", 2), S("L", 6)]),
+  perm_from_cycle([S("U", 9), S("R", 7), S("D", 1), S("L", 3)]),
+].flat();
+
+const b_move = [
+  perm_from_cycle([S("B", 1), S("B", 3), S("B", 9), S("B", 7)]),
+  perm_from_cycle([S("B", 2), S("B", 6), S("B", 8), S("B", 4)]),
+  perm_from_cycle([S("U", 3), S("L", 1), S("D", 7), S("R", 3)]),
+  perm_from_cycle([S("U", 2), S("L", 4), S("D", 8), S("R", 6)]),
+  perm_from_cycle([S("U", 1), S("L", 7), S("D", 9), S("R", 9)]),
+].flat();
+
+const l_move = [
+  perm_from_cycle([S("L", 1), S("L", 3), S("L", 9), S("L", 7)]),
+  perm_from_cycle([S("L", 2), S("L", 6), S("L", 8), S("L", 4)]),
+  perm_from_cycle([S("U", 1), S("F", 1), S("D", 1), S("B", 9)]),
+  perm_from_cycle([S("U", 4), S("F", 4), S("D", 4), S("B", 6)]),
+  perm_from_cycle([S("U", 7), S("F", 7), S("D", 7), S("B", 3)]),
+].flat();
+
+const d_move = [
+  perm_from_cycle([S("D", 1), S("D", 3), S("D", 9), S("D", 7)]),
+  perm_from_cycle([S("D", 2), S("D", 6), S("D", 8), S("D", 4)]),
+  perm_from_cycle([S("F", 7), S("R", 7), S("B", 7), S("L", 7)]),
+  perm_from_cycle([S("F", 8), S("R", 8), S("B", 8), S("L", 8)]),
+  perm_from_cycle([S("F", 9), S("R", 9), S("B", 9), S("L", 9)]),
+].flat();
+
+function apply_move(cube: Cube, perm: number[][]): Cube {
+  let new_cube = [...cube];
+  for (let x of perm) {
+    new_cube[x[1]] = cube[x[0]];
+  }
+  //perm.forEach( ([src, dst]) => new_cube[dst] = cube[src] );
+  return new_cube;
+}
+
 // Ensure CubeState explicitly requires all Face keys
 export type CubeState = {
   [key in Face]: FaceState;
@@ -41,190 +137,54 @@ export const COLORS: Record<string, Color> = {
   ORANGE: "O",
 };
 
-// Use direct keys for clarity and type safety
-export const initialSolvedState: CubeState = {
-  U: [
-    // Yellow
-    [COLORS.YELLOW, COLORS.YELLOW, COLORS.YELLOW],
-    [COLORS.YELLOW, COLORS.YELLOW, COLORS.YELLOW],
-    [COLORS.YELLOW, COLORS.YELLOW, COLORS.YELLOW],
-  ],
-  D: [
-    // White
-    [COLORS.WHITE, COLORS.WHITE, COLORS.WHITE],
-    [COLORS.WHITE, COLORS.WHITE, COLORS.WHITE],
-    [COLORS.WHITE, COLORS.WHITE, COLORS.WHITE],
-  ],
-  F: [
-    // Blue
-    [COLORS.BLUE, COLORS.BLUE, COLORS.BLUE],
-    [COLORS.BLUE, COLORS.BLUE, COLORS.BLUE],
-    [COLORS.BLUE, COLORS.BLUE, COLORS.BLUE],
-  ],
-  B: [
-    // Green
-    [COLORS.GREEN, COLORS.GREEN, COLORS.GREEN],
-    [COLORS.GREEN, COLORS.GREEN, COLORS.GREEN],
-    [COLORS.GREEN, COLORS.GREEN, COLORS.GREEN],
-  ],
-  L: [
-    // Orange
-    [COLORS.ORANGE, COLORS.ORANGE, COLORS.ORANGE],
-    [COLORS.ORANGE, COLORS.ORANGE, COLORS.ORANGE],
-    [COLORS.ORANGE, COLORS.ORANGE, COLORS.ORANGE],
-  ],
-  R: [
-    // Red
-    [COLORS.RED, COLORS.RED, COLORS.RED],
-    [COLORS.RED, COLORS.RED, COLORS.RED],
-    [COLORS.RED, COLORS.RED, COLORS.RED],
-  ],
-};
-
-// --- Helper Functions ---
-
-// Deep copy a cube state
-function deepCopyState(state: CubeState): CubeState {
-  return JSON.parse(JSON.stringify(state));
-}
-
-// Rotate a 3x3 face clockwise
-function rotateFaceCW(face: FaceState): FaceState {
-  // Initialize with a valid placeholder color
-  const newFace: FaceState = [
-    [COLORS.WHITE, COLORS.WHITE, COLORS.WHITE],
-    [COLORS.WHITE, COLORS.WHITE, COLORS.WHITE],
-    [COLORS.WHITE, COLORS.WHITE, COLORS.WHITE],
-  ];
-  for (let i = 0; i < 3; i++) {
-    for (let j = 0; j < 3; j++) {
-      newFace[j][2 - i] = face[i][j];
-    }
+function apply_single_move_to_cube(cube: Cube, move: string): Cube {
+  // To implement CCW moves, we can rotate the cube 3 times
+  switch (move) {
+    case "U":
+      return apply_move(cube, u_move);
+    case "U2":
+      return apply_move(apply_move(cube, u_move), u_move);
+    case "U'":
+      return apply_move(apply_move(apply_move(cube, u_move), u_move), u_move);
+    case "D":
+      return apply_move(cube, d_move);
+    case "D2":
+      return apply_move(apply_move(cube, d_move), d_move);
+    case "D'":
+      return apply_move(apply_move(apply_move(cube, d_move), d_move), d_move);
+    case "F":
+      return apply_move(cube, f_move);
+    case "F2":
+      return apply_move(apply_move(cube, f_move), f_move);
+    case "F'":
+      return apply_move(apply_move(apply_move(cube, f_move), f_move), f_move);
+    case "B":
+      return apply_move(cube, b_move);
+    case "B2":
+      return apply_move(apply_move(cube, b_move), b_move);
+    case "B'":
+      return apply_move(apply_move(apply_move(cube, b_move), b_move), b_move);
+    case "L":
+      return apply_move(cube, l_move);
+    case "L2":
+      return apply_move(apply_move(cube, l_move), l_move);
+    case "L'":
+      return apply_move(apply_move(apply_move(cube, l_move), l_move), l_move);
+    case "R":
+      return apply_move(cube, r_move);
+    case "R2":
+      return apply_move(apply_move(cube, r_move), r_move);
+    case "R'":
+      return apply_move(apply_move(apply_move(cube, r_move), r_move), r_move);
+    default:
+      throw new Error(`Invalid move: ${move}`);
   }
-  return newFace;
 }
-
-// Rotate a 3x3 face counter-clockwise
-function rotateFaceCCW(face: FaceState): FaceState {
-  // Initialize with a valid placeholder color
-  const newFace: FaceState = [
-    [COLORS.WHITE, COLORS.WHITE, COLORS.WHITE],
-    [COLORS.WHITE, COLORS.WHITE, COLORS.WHITE],
-    [COLORS.WHITE, COLORS.WHITE, COLORS.WHITE],
-  ];
-  for (let i = 0; i < 3; i++) {
-    for (let j = 0; j < 3; j++) {
-      newFace[2 - j][i] = face[i][j];
-    }
-  }
-  return newFace;
-}
-
-// Apply a single move notation to a given state
-function applySingleMoveToState(state: CubeState, move: string): CubeState {
-  const newState = deepCopyState(state);
-  const faceChar = move.charAt(0) as Face; // Assume valid face char after regex parse
-  const modifier = move.slice(1); // '', "'", "2"
-
-  // Use CCW rotation for prime moves for potentially cleaner logic,
-  // or stick to multiple CW rotations as before. Let's stick to CW for now.
-  const turns = modifier === "'" ? 3 : modifier === "2" ? 2 : 1;
-
-  for (let turn = 0; turn < turns; turn++) {
-    // Rotate the face itself
-    newState[faceChar] = rotateFaceCW(newState[faceChar]);
-
-    // Rotate adjacent stickers (this is the complex part)
-    let tempRow: Sticker[];
-    let tempCol: Sticker[];
-
-    switch (faceChar) {
-      case "U":
-        tempRow = newState.F[0];
-        newState.F[0] = newState.R[0];
-        newState.R[0] = newState.B[0];
-        newState.B[0] = newState.L[0];
-        newState.L[0] = tempRow;
-        break;
-      case "D":
-        tempRow = newState.F[2];
-        newState.F[2] = newState.L[2];
-        newState.L[2] = newState.B[2];
-        newState.B[2] = newState.R[2];
-        newState.R[2] = tempRow;
-        break;
-      case "F":
-        tempCol = [newState.U[0][0], newState.U[0][1], newState.U[0][2]];
-        newState.U[0][0] = newState.R[0][2];
-        newState.U[0][1] = newState.R[1][2];
-        newState.U[0][2] = newState.R[2][2];
-        newState.R[0][2] = newState.D[2][2];
-        newState.R[1][2] = newState.D[2][1];
-        newState.R[2][2] = newState.D[2][0];
-        newState.D[2][0] = newState.L[0][0];
-        newState.D[2][1] = newState.L[1][0];
-        newState.D[2][2] = newState.L[2][0];
-        newState.L[0][0] = tempCol[2];
-        newState.L[1][0] = tempCol[1];
-        newState.L[2][0] = tempCol[0];
-        break;
-      case "B":
-        tempCol = [newState.U[2][0], newState.U[2][1], newState.U[2][2]];
-        newState.U[2][0] = newState.L[2][2];
-        newState.U[2][1] = newState.L[1][2];
-        newState.U[2][2] = newState.L[0][2];
-        newState.L[0][2] = newState.D[0][0];
-        newState.L[1][2] = newState.D[0][1];
-        newState.L[2][2] = newState.D[0][2];
-        newState.D[0][0] = newState.R[2][0];
-        newState.D[0][1] = newState.R[1][0];
-        newState.D[0][2] = newState.R[0][0];
-        newState.R[0][0] = tempCol[0];
-        newState.R[1][0] = tempCol[1];
-        newState.R[2][0] = tempCol[2];
-        break;
-      case "L":
-        tempCol = [newState.U[0][0], newState.U[1][0], newState.U[2][0]];
-        newState.U[0][0] = newState.B[2][2];
-        newState.U[1][0] = newState.B[1][2];
-        newState.U[2][0] = newState.B[0][2];
-        newState.B[0][2] = newState.D[2][0];
-        newState.B[1][2] = newState.D[1][0];
-        newState.B[2][2] = newState.D[0][0];
-        newState.D[0][0] = newState.F[0][0];
-        newState.D[1][0] = newState.F[1][0];
-        newState.D[2][0] = newState.F[2][0];
-        newState.F[0][0] = tempCol[0];
-        newState.F[1][0] = tempCol[1];
-        newState.F[2][0] = tempCol[2];
-        break;
-      case "R":
-        tempCol = [newState.U[0][2], newState.U[1][2], newState.U[2][2]];
-        newState.U[0][2] = newState.F[0][2];
-        newState.U[1][2] = newState.F[1][2];
-        newState.U[2][2] = newState.F[2][2];
-        newState.F[0][2] = newState.D[0][2];
-        newState.F[1][2] = newState.D[1][2];
-        newState.F[2][2] = newState.D[2][2];
-        newState.D[0][2] = newState.B[2][0];
-        newState.D[1][2] = newState.B[1][0];
-        newState.D[2][2] = newState.B[0][0];
-        newState.B[0][0] = tempCol[2];
-        newState.B[1][0] = tempCol[1];
-        newState.B[2][0] = tempCol[0];
-        break;
-    }
-  }
-
-  return newState;
-}
-
-// --- RubiksCube Class ---
 
 export class RubiksCube {
   private moveHistory: string[] = [];
   // Make initial state truly readonly from outside
-  public readonly initialState: Readonly<CubeState> = initialSolvedState;
+  public readonly initialState: Readonly<Cube> = solved_cube;
 
   constructor(initialMoves?: string) {
     if (initialMoves) {
@@ -251,13 +211,14 @@ export class RubiksCube {
    * Get the current state of the cube by applying all moves from history.
    * @returns The calculated CubeState.
    */
-  getCurrentState(): CubeState {
+  getCurrentState(): Cube {
     // Start with a deep copy of the initial state
-    let currentState = deepCopyState(this.initialState as CubeState); // Cast needed as deepCopy expects mutable
+    // let currentState = deepCopyState(this.initialState as CubeState); // Cast needed as deepCopy expects mutable
+    let cube = [...this.initialState];
     for (const move of this.moveHistory) {
-      currentState = applySingleMoveToState(currentState, move);
+      cube = apply_single_move_to_cube(cube, move);
     }
-    return currentState;
+    return cube;
   }
 
   /**
@@ -266,27 +227,22 @@ export class RubiksCube {
    */
   isSolved(): boolean {
     let currentState = this.getCurrentState();
-    // Using our custom deepStrictEqual implementation
-    if (deepStrictEqual(currentState, this.initialState)) {
-      return true;
+
+    if (currentState.length !== this.initialState.length) {
+      return false;
     }
 
-    // Fallback: Check if every sticker on a face matches the center sticker's color
-    for (const face of Object.keys(this.initialState) as Face[]) {
-      let expectedColor = this.initialState[face][1][1]; // Initial center piece color
-      for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-          if (currentState[face][i][j] !== expectedColor) {
-            return false;
-          }
-        }
+    for (let i = 0; i < currentState.length; i++) {
+      if (currentState[i] !== this.initialState[i]) {
+        return false;
       }
     }
 
-    // This shouldn't be reached if the logic is correct,
-    // but serves as a fallback if there's an issue with the comparison
-    console.warn("State comparison discrepancy: deepStrictEqual failed but face check passed. Check implementation.");
-    return true; // Return true if face check passed
+    return true;
+  }
+
+  getStickerAt(face: Face, i: number): Sticker {
+    return this.getCurrentState()[S(face, i)];
   }
 
   /**
