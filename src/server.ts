@@ -17,20 +17,20 @@ type Env = {
 export type RubiksCubeState = {
   moveHistory: string[];
   isSolved: boolean;
-  state: Cube;
+  stateHistory: Cube[];
 };
 
 export type RubiksCubeResponse = {
   moveHistory: string[];
   isSolved: boolean;
-  state: Cube;
+  stateHistory: Cube[];
 };
 
 export class RubiksCubeAgent extends Agent<Env, RubiksCubeState> {
   initialState: RubiksCubeState = {
     moveHistory: [],
     isSolved: true,
-    state: solved_cube,
+    stateHistory: [solved_cube],
   };
 
   #getCurrentCube(): RubiksCube {
@@ -45,7 +45,7 @@ export class RubiksCubeAgent extends Agent<Env, RubiksCubeState> {
     this.setState({
       moveHistory: [...cube.getMoveHistory()],
       isSolved: cube.isSolved(),
-      state: cube.getCurrentState(),
+      stateHistory: [...this.state.stateHistory, cube.getCurrentState()],
     });
 
     return this.state;
@@ -59,7 +59,7 @@ export class RubiksCubeAgent extends Agent<Env, RubiksCubeState> {
     return {
       moveHistory: [...cube.getMoveHistory()],
       isSolved: cube.isSolved(),
-      state: cube.getCurrentState(),
+      stateHistory: [...this.state.stateHistory, cube.getCurrentState()],
     };
   }
 
@@ -73,7 +73,7 @@ export class RubiksCubeAgent extends Agent<Env, RubiksCubeState> {
     this.setState({
       moveHistory: [],
       isSolved: true,
-      state: solved_cube,
+      stateHistory: [solved_cube],
     });
     return this.state;
   }
@@ -85,7 +85,7 @@ export class RubiksCubeAgent extends Agent<Env, RubiksCubeState> {
     this.setState({
       moveHistory: [],
       isSolved: cube.isSolved(),
-      state: cube.getCurrentState(),
+      stateHistory: [cube.getCurrentState()],
     });
     return this.state;
   }
@@ -146,7 +146,7 @@ export class RubiksCubeMCP extends McpAgent<Env, RubiksCubeMCPState> {
 
       const output = dedent`
         Here is the cube state:
-        ${RubiksCubeMCP.renderCubeState(state.state)}
+        ${RubiksCubeMCP.renderCubeState(state.stateHistory[state.stateHistory.length - 1])}
 
         You can view the cube at the following URLs. Be sure to show these to the user:
         Interactive 3D view: http://localhost:5173/${cubeId}
@@ -175,7 +175,12 @@ export class RubiksCubeMCP extends McpAgent<Env, RubiksCubeMCPState> {
         let cubeAgent = await getAgentByName(self.env.RubiksCubeAgent, self.state.cubeId);
         let state = await cubeAgent.applyMoveSequence(moves);
         return {
-          content: [{ type: "text", text: String(RubiksCubeMCP.renderCubeState(state.state)) }],
+          content: [
+            {
+              type: "text",
+              text: String(RubiksCubeMCP.renderCubeState(state.stateHistory[state.stateHistory.length - 1])),
+            },
+          ],
         };
       }
     );
@@ -188,7 +193,12 @@ export class RubiksCubeMCP extends McpAgent<Env, RubiksCubeMCPState> {
         let cubeAgent = await getAgentByName(self.env.RubiksCubeAgent, self.state.cubeId);
         let state = await cubeAgent.previewMoveSequence(moves);
         return {
-          content: [{ type: "text", text: String(RubiksCubeMCP.renderCubeState(state.state)) }],
+          content: [
+            {
+              type: "text",
+              text: String(RubiksCubeMCP.renderCubeState(state.stateHistory[state.stateHistory.length - 1])),
+            },
+          ],
         };
       }
     );
