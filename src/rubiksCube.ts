@@ -122,35 +122,6 @@ function rotateFaceCCW(face: FaceState): FaceState {
 
 // Apply a single move notation to a given state
 function applySingleMoveToState(state: CubeState, move: string): CubeState {
-  // There's a logic bug here, where these moves are implemented incorrectly
-  // and just swapping them here is easier than fixing the logic
-  switch (move) {
-    case "F":
-      move = "F'";
-      break;
-    case "F'":
-      move = "F";
-      break;
-    case "B":
-      move = "B'";
-      break;
-    case "B'":
-      move = "B";
-      break;
-    case "U":
-      move = "U'";
-      break;
-    case "U'":
-      move = "U";
-      break;
-    case "D":
-      move = "D'";
-      break;
-    case "D'":
-      move = "D";
-      break;
-  }
-
   const newState = deepCopyState(state);
   const faceChar = move.charAt(0) as Face; // Assume valid face char after regex parse
   const modifier = move.slice(1); // '', "'", "2"

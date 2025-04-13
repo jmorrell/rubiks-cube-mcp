@@ -28,7 +28,7 @@ describe("RubiksCube", () => {
     expect(cube.getMoveHistory()).toEqual([]);
   });
 
-  test("should apply a single clockwise move", () => {
+  test("should apply a single clockwise R move", () => {
     cube.applyMoveSequence("R");
     expect(cube.isSolved()).toBe(false);
     expect(cube.getMoveHistory()).toEqual(["R"]);
@@ -49,7 +49,97 @@ describe("RubiksCube", () => {
     expect(state.R[0][2]).toBe("R"); // Corner moved
   });
 
-  test("should apply a single counter-clockwise move", () => {
+  test("should apply a single clockwise L move", () => {
+    cube.applyMoveSequence("L");
+    expect(cube.isSolved()).toBe(false);
+    expect(cube.getMoveHistory()).toEqual(["L"]);
+    const state = cube.getCurrentState();
+    // Up face left col should be Blue (from Front)
+    expect(state.U[0][0]).toBe("B");
+    expect(state.U[1][0]).toBe("B");
+    expect(state.U[2][0]).toBe("B");
+    // Front face left col should be White (from Down)
+    expect(state.F[0][0]).toBe("W");
+    expect(state.F[1][0]).toBe("W");
+    expect(state.F[2][0]).toBe("W");
+    // Left face should be rotated
+    expect(state.L[0][1]).toBe("O"); // Top edge moved
+    expect(state.L[1][0]).toBe("O"); // Middle edge moved
+  });
+
+  test("should apply a single clockwise U move", () => {
+    cube.applyMoveSequence("U");
+    expect(cube.isSolved()).toBe(false);
+    expect(cube.getMoveHistory()).toEqual(["U"]);
+    const state = cube.getCurrentState();
+    // Front face top row should be Red (from Right)
+    expect(state.F[0][0]).toBe("R");
+    expect(state.F[0][1]).toBe("R");
+    expect(state.F[0][2]).toBe("R");
+    // Right face top row should be Green (from Back)
+    expect(state.R[0][0]).toBe("G");
+    expect(state.R[0][1]).toBe("G");
+    expect(state.R[0][2]).toBe("G");
+    // Up face should be rotated
+    expect(state.U[0][1]).toBe("Y"); // Top edge moved
+    expect(state.U[1][0]).toBe("Y"); // Middle edge moved
+  });
+
+  test("should apply a single clockwise D move", () => {
+    cube.applyMoveSequence("D");
+    expect(cube.isSolved()).toBe(false);
+    expect(cube.getMoveHistory()).toEqual(["D"]);
+    const state = cube.getCurrentState();
+    // Front face bottom row should be Orange (from Left)
+    expect(state.F[2][0]).toBe("O");
+    expect(state.F[2][1]).toBe("O");
+    expect(state.F[2][2]).toBe("O");
+    // Left face bottom row should be Green (from Back)
+    expect(state.L[2][0]).toBe("G");
+    expect(state.L[2][1]).toBe("G");
+    expect(state.L[2][2]).toBe("G");
+    // Down face should be rotated
+    expect(state.D[0][1]).toBe("W"); // Top edge moved (relative to D face)
+    expect(state.D[1][0]).toBe("W"); // Middle edge moved
+  });
+
+  test("should apply a single clockwise F move", () => {
+    cube.applyMoveSequence("F");
+    expect(cube.isSolved()).toBe(false);
+    expect(cube.getMoveHistory()).toEqual(["F"]);
+    const state = cube.getCurrentState();
+    // Up face bottom row should be Red (from Right)
+    expect(state.U[2][0]).toBe("R");
+    expect(state.U[2][1]).toBe("R");
+    expect(state.U[2][2]).toBe("R");
+    // Right face left col should be White (from Down)
+    expect(state.R[0][0]).toBe("W");
+    expect(state.R[1][0]).toBe("W");
+    expect(state.R[2][0]).toBe("W");
+    // Front face should be rotated
+    expect(state.F[0][1]).toBe("B"); // Top edge moved
+    expect(state.F[1][0]).toBe("B"); // Middle edge moved
+  });
+
+  test("should apply a single clockwise B move", () => {
+    cube.applyMoveSequence("B");
+    expect(cube.isSolved()).toBe(false);
+    expect(cube.getMoveHistory()).toEqual(["B"]);
+    const state = cube.getCurrentState();
+    // Up face top row should be Orange (from Left)
+    expect(state.U[0][0]).toBe("O");
+    expect(state.U[0][1]).toBe("O");
+    expect(state.U[0][2]).toBe("O");
+    // Left face left col should be White (from Down)
+    expect(state.L[0][0]).toBe("W");
+    expect(state.L[1][0]).toBe("W");
+    expect(state.L[2][0]).toBe("W");
+    // Back face should be rotated
+    expect(state.B[0][1]).toBe("G"); // Top edge moved
+    expect(state.B[1][0]).toBe("G"); // Middle edge moved
+  });
+
+  test("should apply a single counter-clockwise F' move", () => {
     cube.applyMoveSequence("F'");
     expect(cube.isSolved()).toBe(false);
     expect(cube.getMoveHistory()).toEqual(["F'"]);
@@ -62,6 +152,96 @@ describe("RubiksCube", () => {
     expect(state.R[0][0]).toBe("W");
     expect(state.R[1][0]).toBe("W");
     expect(state.R[2][0]).toBe("W");
+  });
+
+  test("should apply a single counter-clockwise R' move", () => {
+    cube.applyMoveSequence("R'");
+    expect(cube.isSolved()).toBe(false);
+    expect(cube.getMoveHistory()).toEqual(["R'"]);
+    let state = cube.getCurrentState();
+    // Up face right col should be Green (from Back)
+    expect(state.U[0][2]).toBe("G");
+    expect(state.U[1][2]).toBe("G");
+    expect(state.U[2][2]).toBe("G");
+    // Back face left col should be White (from Down)
+    expect(state.B[0][2]).toBe("W"); // Note: Back face is indexed differently
+    expect(state.B[1][2]).toBe("W");
+    expect(state.B[2][2]).toBe("W");
+    // Right face should be rotated counter-clockwise
+    expect(state.R[0][1]).toBe("R"); // Top edge moved
+    expect(state.R[1][2]).toBe("R"); // Right edge moved
+  });
+
+  test("should apply a single counter-clockwise L' move", () => {
+    cube.applyMoveSequence("L'");
+    expect(cube.isSolved()).toBe(false);
+    expect(cube.getMoveHistory()).toEqual(["L'"]);
+    let state = cube.getCurrentState();
+    // Up face left col should be Green (from Back)
+    expect(state.U[0][0]).toBe("G");
+    expect(state.U[1][0]).toBe("G");
+    expect(state.U[2][0]).toBe("G");
+    // Back face right col should be White (from Down)
+    expect(state.B[0][0]).toBe("W");
+    expect(state.B[1][0]).toBe("W");
+    expect(state.B[2][0]).toBe("W");
+    // Left face should be rotated counter-clockwise
+    expect(state.L[0][1]).toBe("O"); // Top edge moved
+    expect(state.L[1][2]).toBe("O"); // Right edge moved
+  });
+
+  test("should apply a single counter-clockwise U' move", () => {
+    cube.applyMoveSequence("U'");
+    expect(cube.isSolved()).toBe(false);
+    expect(cube.getMoveHistory()).toEqual(["U'"]);
+    let state = cube.getCurrentState();
+    // Front face top row should be Orange (from Left)
+    expect(state.F[0][0]).toBe("O");
+    expect(state.F[0][1]).toBe("O");
+    expect(state.F[0][2]).toBe("O");
+    // Left face top row should be Blue (from Front)
+    expect(state.L[0][0]).toBe("B");
+    expect(state.L[0][1]).toBe("B");
+    expect(state.L[0][2]).toBe("B");
+    // Up face should be rotated counter-clockwise
+    expect(state.U[0][1]).toBe("Y"); // Top edge moved
+    expect(state.U[1][2]).toBe("Y"); // Right edge moved
+  });
+
+  test("should apply a single counter-clockwise D' move", () => {
+    cube.applyMoveSequence("D'");
+    expect(cube.isSolved()).toBe(false);
+    expect(cube.getMoveHistory()).toEqual(["D'"]);
+    let state = cube.getCurrentState();
+    // Front face bottom row should be Red (from Right)
+    expect(state.F[2][0]).toBe("R");
+    expect(state.F[2][1]).toBe("R");
+    expect(state.F[2][2]).toBe("R");
+    // Right face bottom row should be Blue (from Front)
+    expect(state.R[2][0]).toBe("B");
+    expect(state.R[2][1]).toBe("B");
+    expect(state.R[2][2]).toBe("B");
+    // Down face should be rotated counter-clockwise
+    expect(state.D[0][1]).toBe("W"); // Top edge moved (relative to D face)
+    expect(state.D[1][2]).toBe("W"); // Right edge moved
+  });
+
+  test("should apply a single counter-clockwise B' move", () => {
+    cube.applyMoveSequence("B'");
+    expect(cube.isSolved()).toBe(false);
+    expect(cube.getMoveHistory()).toEqual(["B'"]);
+    let state = cube.getCurrentState();
+    // Up face top row should be Red (from Right)
+    expect(state.U[0][0]).toBe("R");
+    expect(state.U[0][1]).toBe("R");
+    expect(state.U[0][2]).toBe("R");
+    // Right face right col should be White (from Down)
+    expect(state.R[0][2]).toBe("W");
+    expect(state.R[1][2]).toBe("W");
+    expect(state.R[2][2]).toBe("W");
+    // Back face should be rotated counter-clockwise
+    expect(state.B[0][1]).toBe("G"); // Top edge moved
+    expect(state.B[1][2]).toBe("G"); // Right edge moved
   });
 
   test("should apply a double move", () => {
