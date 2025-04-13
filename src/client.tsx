@@ -191,7 +191,7 @@ function RubiksCube3D({ state }: { state: Cube }) {
 }
 
 // Scene setup with lighting
-function Scene({ state }: { state: Cube }) {
+function Scene({ state }: { state: RubiksCubeState }) {
   return (
     <>
       <color attach="background" args={["#222"]} />
@@ -213,7 +213,7 @@ function Scene({ state }: { state: Cube }) {
       {/* Additional bottom light */}
       <pointLight position={[0, -10, 0]} intensity={0.5} distance={15} />
 
-      <RubiksCube3D state={state} />
+      <RubiksCube3D state={state.stateHistory[state.stateHistory.length - 1]} />
       <OrbitControls
         enableZoom={true}
         enablePan={false}
@@ -301,7 +301,7 @@ function App() {
                   dpr={[1, 2]}
                   style={{ width: "100%", height: "100%" }}
                 >
-                  <Scene state={state.stateHistory[state.stateHistory.length - 1]} />
+                  <Scene state={state} />
                 </Canvas>
               )}
               {!isReady && <div className="canvas-loading" />}
