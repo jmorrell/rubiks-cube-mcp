@@ -1,4 +1,4 @@
-import { RubiksCube, initialSolvedState } from "./rubiksCube";
+import { COLORS, RubiksCube, initialSolvedState } from "./rubiksCube";
 import type { CubeState, Face, Color } from "./rubiksCube";
 import { deepStrictEqual } from "assert"; // Using Node's assert for deep comparison
 
@@ -42,11 +42,11 @@ describe("RubiksCube", () => {
     expect(state.F[0][2]).toBe("W");
     expect(state.F[1][2]).toBe("W");
     expect(state.F[2][2]).toBe("W");
-    // Right face should be rotated
-    expect(state.R[0][0]).toBe("R"); // Center unchanged
+    // Right face should still be Red
+    expect(state.R[0][0]).toBe("R");
     expect(state.R[0][1]).toBe("R");
     expect(state.R[1][0]).toBe("R");
-    expect(state.R[0][2]).toBe("R"); // Corner moved
+    expect(state.R[0][2]).toBe("R");
   });
 
   test("should apply a single clockwise L move", () => {
@@ -54,17 +54,17 @@ describe("RubiksCube", () => {
     expect(cube.isSolved()).toBe(false);
     expect(cube.getMoveHistory()).toEqual(["L"]);
     const state = cube.getCurrentState();
-    // Up face left col should be Blue (from Front)
-    expect(state.U[0][0]).toBe("B");
-    expect(state.U[1][0]).toBe("B");
-    expect(state.U[2][0]).toBe("B");
-    // Front face left col should be White (from Down)
-    expect(state.F[0][0]).toBe("W");
-    expect(state.F[1][0]).toBe("W");
-    expect(state.F[2][0]).toBe("W");
-    // Left face should be rotated
-    expect(state.L[0][1]).toBe("O"); // Top edge moved
-    expect(state.L[1][0]).toBe("O"); // Middle edge moved
+    // Up face left col should be Green (from Back)
+    expect(state.U[0][0]).toBe("G");
+    expect(state.U[1][0]).toBe("G");
+    expect(state.U[2][0]).toBe("G");
+    // Front face left col should be Yellow (from Up)
+    expect(state.F[0][0]).toBe("Y");
+    expect(state.F[1][0]).toBe("Y");
+    expect(state.F[2][0]).toBe("Y");
+    // Left face should still be Orange
+    expect(state.L[0][1]).toBe("O");
+    expect(state.L[1][0]).toBe("O");
   });
 
   test("should apply a single clockwise U move", () => {
@@ -80,9 +80,9 @@ describe("RubiksCube", () => {
     expect(state.R[0][0]).toBe("G");
     expect(state.R[0][1]).toBe("G");
     expect(state.R[0][2]).toBe("G");
-    // Up face should be rotated
-    expect(state.U[0][1]).toBe("Y"); // Top edge moved
-    expect(state.U[1][0]).toBe("Y"); // Middle edge moved
+    // Up face should still be Yellow
+    expect(state.U[0][1]).toBe("Y");
+    expect(state.U[1][0]).toBe("Y");
   });
 
   test("should apply a single clockwise D move", () => {
@@ -98,9 +98,9 @@ describe("RubiksCube", () => {
     expect(state.L[2][0]).toBe("G");
     expect(state.L[2][1]).toBe("G");
     expect(state.L[2][2]).toBe("G");
-    // Down face should be rotated
-    expect(state.D[0][1]).toBe("W"); // Top edge moved (relative to D face)
-    expect(state.D[1][0]).toBe("W"); // Middle edge moved
+    // Down face should still be white
+    expect(state.D[0][1]).toBe("W");
+    expect(state.D[1][0]).toBe("W");
   });
 
   test("should apply a single clockwise F move", () => {
@@ -108,17 +108,17 @@ describe("RubiksCube", () => {
     expect(cube.isSolved()).toBe(false);
     expect(cube.getMoveHistory()).toEqual(["F"]);
     const state = cube.getCurrentState();
-    // Up face bottom row should be Red (from Right)
-    expect(state.U[2][0]).toBe("R");
-    expect(state.U[2][1]).toBe("R");
-    expect(state.U[2][2]).toBe("R");
-    // Right face left col should be White (from Down)
-    expect(state.R[0][0]).toBe("W");
-    expect(state.R[1][0]).toBe("W");
-    expect(state.R[2][0]).toBe("W");
-    // Front face should be rotated
-    expect(state.F[0][1]).toBe("B"); // Top edge moved
-    expect(state.F[1][0]).toBe("B"); // Middle edge moved
+    // Up face bottom row should be Orange (from Left)
+    expect(state.U[2][0]).toBe("O");
+    expect(state.U[2][1]).toBe("O");
+    expect(state.U[2][2]).toBe("O");
+    // Right face left col should be Yellow (from Up)
+    expect(state.R[0][0]).toBe("Y");
+    expect(state.R[1][0]).toBe("Y");
+    expect(state.R[2][0]).toBe("Y");
+    // Front face should still be Blue
+    expect(state.F[0][1]).toBe("B");
+    expect(state.F[1][0]).toBe("B");
   });
 
   test("should apply a single clockwise B move", () => {
@@ -126,17 +126,17 @@ describe("RubiksCube", () => {
     expect(cube.isSolved()).toBe(false);
     expect(cube.getMoveHistory()).toEqual(["B"]);
     const state = cube.getCurrentState();
-    // Up face top row should be Orange (from Left)
-    expect(state.U[0][0]).toBe("O");
-    expect(state.U[0][1]).toBe("O");
-    expect(state.U[0][2]).toBe("O");
-    // Left face left col should be White (from Down)
-    expect(state.L[0][0]).toBe("W");
-    expect(state.L[1][0]).toBe("W");
-    expect(state.L[2][0]).toBe("W");
-    // Back face should be rotated
-    expect(state.B[0][1]).toBe("G"); // Top edge moved
-    expect(state.B[1][0]).toBe("G"); // Middle edge moved
+    // Up face top row should be Red (from Right)
+    expect(state.U[0][0]).toBe("R");
+    expect(state.U[0][1]).toBe("R");
+    expect(state.U[0][2]).toBe("R");
+    // Left face left col should be Yellow (from Up)
+    expect(state.L[0][0]).toBe("Y");
+    expect(state.L[1][0]).toBe("Y");
+    expect(state.L[2][0]).toBe("Y");
+    // Back face should still be Green
+    expect(state.B[0][1]).toBe("G");
+    expect(state.B[1][0]).toBe("G");
   });
 
   test("should apply a single counter-clockwise F' move", () => {
@@ -167,9 +167,9 @@ describe("RubiksCube", () => {
     expect(state.B[0][2]).toBe("W"); // Note: Back face is indexed differently
     expect(state.B[1][2]).toBe("W");
     expect(state.B[2][2]).toBe("W");
-    // Right face should be rotated counter-clockwise
-    expect(state.R[0][1]).toBe("R"); // Top edge moved
-    expect(state.R[1][2]).toBe("R"); // Right edge moved
+    // Right face should still be Red
+    expect(state.R[0][1]).toBe("R");
+    expect(state.R[1][2]).toBe("R");
   });
 
   test("should apply a single counter-clockwise L' move", () => {
@@ -177,17 +177,17 @@ describe("RubiksCube", () => {
     expect(cube.isSolved()).toBe(false);
     expect(cube.getMoveHistory()).toEqual(["L'"]);
     let state = cube.getCurrentState();
-    // Up face left col should be Green (from Back)
-    expect(state.U[0][0]).toBe("G");
-    expect(state.U[1][0]).toBe("G");
-    expect(state.U[2][0]).toBe("G");
-    // Back face right col should be White (from Down)
-    expect(state.B[0][0]).toBe("W");
-    expect(state.B[1][0]).toBe("W");
-    expect(state.B[2][0]).toBe("W");
-    // Left face should be rotated counter-clockwise
-    expect(state.L[0][1]).toBe("O"); // Top edge moved
-    expect(state.L[1][2]).toBe("O"); // Right edge moved
+    // Up face left col should be Blue (from Front)
+    expect(state.U[0][0]).toBe("B");
+    expect(state.U[1][0]).toBe("B");
+    expect(state.U[2][0]).toBe("B");
+    // Back face right col should be Yellow (from Up)
+    expect(state.B[0][0]).toBe("Y");
+    expect(state.B[1][0]).toBe("Y");
+    expect(state.B[2][0]).toBe("Y");
+    // Left face should still be Orange
+    expect(state.L[0][1]).toBe("O");
+    expect(state.L[1][2]).toBe("O");
   });
 
   test("should apply a single counter-clockwise U' move", () => {
@@ -199,13 +199,13 @@ describe("RubiksCube", () => {
     expect(state.F[0][0]).toBe("O");
     expect(state.F[0][1]).toBe("O");
     expect(state.F[0][2]).toBe("O");
-    // Left face top row should be Blue (from Front)
-    expect(state.L[0][0]).toBe("B");
-    expect(state.L[0][1]).toBe("B");
-    expect(state.L[0][2]).toBe("B");
-    // Up face should be rotated counter-clockwise
-    expect(state.U[0][1]).toBe("Y"); // Top edge moved
-    expect(state.U[1][2]).toBe("Y"); // Right edge moved
+    // Left face top row should be Green (from Back)
+    expect(state.L[0][0]).toBe("G");
+    expect(state.L[0][1]).toBe("G");
+    expect(state.L[0][2]).toBe("G");
+    // Up face should still be Yellow
+    expect(state.U[0][1]).toBe("Y");
+    expect(state.U[1][2]).toBe("Y");
   });
 
   test("should apply a single counter-clockwise D' move", () => {
@@ -217,13 +217,13 @@ describe("RubiksCube", () => {
     expect(state.F[2][0]).toBe("R");
     expect(state.F[2][1]).toBe("R");
     expect(state.F[2][2]).toBe("R");
-    // Right face bottom row should be Blue (from Front)
-    expect(state.R[2][0]).toBe("B");
-    expect(state.R[2][1]).toBe("B");
-    expect(state.R[2][2]).toBe("B");
-    // Down face should be rotated counter-clockwise
-    expect(state.D[0][1]).toBe("W"); // Top edge moved (relative to D face)
-    expect(state.D[1][2]).toBe("W"); // Right edge moved
+    // Right face bottom row should be Green (from Back)
+    expect(state.R[2][0]).toBe("G");
+    expect(state.R[2][1]).toBe("G");
+    expect(state.R[2][2]).toBe("G");
+    // Down face should still be White
+    expect(state.D[0][1]).toBe("W");
+    expect(state.D[1][2]).toBe("W");
   });
 
   test("should apply a single counter-clockwise B' move", () => {
@@ -239,9 +239,9 @@ describe("RubiksCube", () => {
     expect(state.R[0][2]).toBe("W");
     expect(state.R[1][2]).toBe("W");
     expect(state.R[2][2]).toBe("W");
-    // Back face should be rotated counter-clockwise
-    expect(state.B[0][1]).toBe("G"); // Top edge moved
-    expect(state.B[1][2]).toBe("G"); // Right edge moved
+    // Back face should still be Green
+    expect(state.B[0][1]).toBe("G");
+    expect(state.B[1][2]).toBe("G");
   });
 
   test("should apply a double move", () => {
@@ -296,6 +296,30 @@ describe("RubiksCube", () => {
       assertCubeIsSolved(cube_, `${face}' ${face}`);
     });
   });
+
+  // test("performing the sequence R U R' U' 3 times should put the cube into a known scrambled state", () => {
+  //   const sequence = "R U R' U'";
+  //   for (let i = 0; i < 6; i++) {
+  //     cube.applyMoveSequence(sequence);
+  //   }
+
+  //   let state = cube.getCurrentState();
+  //   expect(state.F[0][0]).toBe(COLORS.BLUE);
+  //   expect(state.F[0][1]).toBe(COLORS.BLUE);
+  //   expect(state.F[0][2]).toBe(COLORS.RED);
+
+  //   expect(state.R[0][0]).toBe(COLORS.BLUE);
+  //   expect(state.R[0][1]).toBe(COLORS.RED);
+  //   expect(state.R[0][2]).toBe(COLORS.ORANGE);
+
+  //   expect(state.U[2][0]).toBe(COLORS.YELLOW);
+  //   expect(state.U[2][1]).toBe(COLORS.YELLOW);
+  //   expect(state.U[2][2]).toBe(COLORS.WHITE);
+
+  //   expect(state.U[0][2]).toBe(COLORS.WHITE);
+  //   expect(state.U[1][2]).toBe(COLORS.YELLOW);
+  //   expect(state.U[2][2]).toBe(COLORS.GREEN);
+  // });
 
   test("performing the sequence R U R' U' 6 times should return to solved state", () => {
     const sequence = "R U R' U'";
