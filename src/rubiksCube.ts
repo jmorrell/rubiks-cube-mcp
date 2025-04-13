@@ -13,22 +13,22 @@ export type Cube = Sticker[];
 function map_face_to_initial_sticker(face: Face): Sticker {
   switch (face) {
     case "U":
-      return COLORS.YELLOW;
+      return "Y";
     case "D":
-      return COLORS.WHITE;
+      return "W";
     case "F":
-      return COLORS.BLUE;
+      return "B";
     case "B":
-      return COLORS.GREEN;
+      return "G";
     case "L":
-      return COLORS.ORANGE;
+      return "O";
     case "R":
-      return COLORS.RED;
+      return "R";
   }
 }
 
 let solved_cube: Cube = (["U", "R", "F", "D", "L", "B"] as Face[])
-  .map((s) => map_face_to_initial_sticker(s).repeat(9))
+  .map((s) => map_face_to_initial_sticker(s).repeat(9).split(""))
   .flat() as Cube;
 
 // S(F, 4) will refer to the 4th facelet on the F face (FL), counting from top to bottom, left to right
@@ -126,15 +126,6 @@ function apply_move(cube: Cube, perm: number[][]): Cube {
 // Ensure CubeState explicitly requires all Face keys
 export type CubeState = {
   [key in Face]: FaceState;
-};
-
-export const COLORS: Record<string, Color> = {
-  WHITE: "W",
-  YELLOW: "Y",
-  BLUE: "B",
-  GREEN: "G",
-  RED: "R",
-  ORANGE: "O",
 };
 
 function apply_single_move_to_cube(cube: Cube, move: string): Cube {
