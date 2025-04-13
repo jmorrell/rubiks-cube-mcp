@@ -154,21 +154,6 @@ function applySingleMoveToState(state: CubeState, move: string): CubeState {
         newState.R[2] = tempRow;
         break;
       case "F":
-        tempCol = [newState.U[2][0], newState.U[2][1], newState.U[2][2]];
-        newState.U[2][0] = newState.L[2][2];
-        newState.U[2][1] = newState.L[1][2];
-        newState.U[2][2] = newState.L[0][2];
-        newState.L[0][2] = newState.D[0][0];
-        newState.L[1][2] = newState.D[0][1];
-        newState.L[2][2] = newState.D[0][2];
-        newState.D[0][0] = newState.R[2][0];
-        newState.D[0][1] = newState.R[1][0];
-        newState.D[0][2] = newState.R[0][0];
-        newState.R[0][0] = tempCol[0];
-        newState.R[1][0] = tempCol[1];
-        newState.R[2][0] = tempCol[2];
-        break;
-      case "B":
         tempCol = [newState.U[0][0], newState.U[0][1], newState.U[0][2]];
         newState.U[0][0] = newState.R[0][2];
         newState.U[0][1] = newState.R[1][2];
@@ -182,6 +167,21 @@ function applySingleMoveToState(state: CubeState, move: string): CubeState {
         newState.L[0][0] = tempCol[2];
         newState.L[1][0] = tempCol[1];
         newState.L[2][0] = tempCol[0];
+        break;
+      case "B":
+        tempCol = [newState.U[2][0], newState.U[2][1], newState.U[2][2]];
+        newState.U[2][0] = newState.L[2][2];
+        newState.U[2][1] = newState.L[1][2];
+        newState.U[2][2] = newState.L[0][2];
+        newState.L[0][2] = newState.D[0][0];
+        newState.L[1][2] = newState.D[0][1];
+        newState.L[2][2] = newState.D[0][2];
+        newState.D[0][0] = newState.R[2][0];
+        newState.D[0][1] = newState.R[1][0];
+        newState.D[0][2] = newState.R[0][0];
+        newState.R[0][0] = tempCol[0];
+        newState.R[1][0] = tempCol[1];
+        newState.R[2][0] = tempCol[2];
         break;
       case "L":
         tempCol = [newState.U[0][0], newState.U[1][0], newState.U[2][0]];
