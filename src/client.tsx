@@ -6,36 +6,22 @@ import { OrbitControls } from "@react-three/drei";
 import { Color as ThreeColor, Euler, Vector3, Group } from "three";
 import * as THREE from "three";
 import type { RubiksCubeState } from "./server";
-import { initialSolvedState, type CubeState, type Color, COLORS } from "./rubiksCube";
+import { solved_cube, type Cube, type Color, S } from "./rubiksCube";
 import "./styles.css";
 
-// Update the colorMap to be absolutely sure it matches with COLORS
-let colorMap = {
-  [COLORS.WHITE]: "#FFFFFF", // White - W
-  [COLORS.YELLOW]: "#FFFF00", // Yellow - Y
-  [COLORS.BLUE]: "#0000FF", // Blue - B
-  [COLORS.GREEN]: "#00FF00", // Green - G
-  [COLORS.RED]: "#FF0000", // Red - R
-  [COLORS.ORANGE]: "#FFA500", // Orange - O
+// Define color map with explicit type
+let colorMap: Record<string, string> = {
+  W: "#FFFFFF", // White
+  Y: "#FFFF00", // Yellow
+  B: "#0000FF", // Blue
+  G: "#00FF00", // Green
+  R: "#FF0000", // Red
+  O: "#FFA500", // Orange
 };
 
 // Function to safely get color from the map
 function getColor(colorCode: string): string {
-  if (!colorCode) {
-    return "#333"; // Default color
-  }
-
-  // Try direct mapping
-  if (colorMap[colorCode]) {
-    return colorMap[colorCode];
-  }
-
-  // Try using the COLORS mapping
-  if (COLORS[colorCode]) {
-    return colorMap[COLORS[colorCode]];
-  }
-
-  return "#333"; // Default color
+  return colorMap[colorCode] ?? "#333"; // Use nullish coalescing for default
 }
 
 // A single cubie (small cube that makes up the Rubik's cube)
@@ -105,7 +91,7 @@ function Cubie({ position, colors, size = 0.85 }: CubieProps) {
 }
 
 // The complete Rubik's cube
-function RubiksCube3D({ state }: { state: CubeState }) {
+function RubiksCube3D({ state }: { state: Cube }) {
   let positions: [number, number, number][] = [];
   let groupRef = useRef<THREE.Group>(null);
 
@@ -143,7 +129,8 @@ function RubiksCube3D({ state }: { state: CubeState }) {
           let row = 1 - z;
           let col = 1 + x;
           if (row >= 0 && row < 3 && col >= 0 && col < 3) {
-            colors.up = getColor(state.U[row][col]);
+            // Calculate 1-based index for S function
+            colors.up = getColor(state[S("U", row * 3 + col + 1)]);
           }
         }
 
@@ -152,7 +139,8 @@ function RubiksCube3D({ state }: { state: CubeState }) {
           let row = 1 + z;
           let col = 1 + x;
           if (row >= 0 && row < 3 && col >= 0 && col < 3) {
-            colors.down = getColor(state.D[row][col]);
+            // Calculate 1-based index for S function
+            colors.down = getColor(state[S("D", row * 3 + col + 1)]);
           }
         }
 
@@ -161,7 +149,8 @@ function RubiksCube3D({ state }: { state: CubeState }) {
           let row = 1 - y;
           let col = 1 + x;
           if (row >= 0 && row < 3 && col >= 0 && col < 3) {
-            colors.front = getColor(state.F[row][col]);
+            // Calculate 1-based index for S function
+            colors.front = getColor(state[S("F", row * 3 + col + 1)]);
           }
         }
 
@@ -170,7 +159,8 @@ function RubiksCube3D({ state }: { state: CubeState }) {
           let row = 1 - y;
           let col = 1 - x;
           if (row >= 0 && row < 3 && col >= 0 && col < 3) {
-            colors.back = getColor(state.B[row][col]);
+            // Calculate 1-based index for S function
+            colors.back = getColor(state[S("B", row * 3 + col + 1)]);
           }
         }
 
@@ -179,7 +169,8 @@ function RubiksCube3D({ state }: { state: CubeState }) {
           let row = 1 - y;
           let col = 1 - z;
           if (row >= 0 && row < 3 && col >= 0 && col < 3) {
-            colors.left = getColor(state.L[row][col]);
+            // Calculate 1-based index for S function
+            colors.left = getColor(state[S("L", row * 3 + col + 1)]);
           }
         }
 
@@ -188,7 +179,8 @@ function RubiksCube3D({ state }: { state: CubeState }) {
           let row = 1 - y;
           let col = 1 + z;
           if (row >= 0 && row < 3 && col >= 0 && col < 3) {
-            colors.right = getColor(state.R[row][col]);
+            // Calculate 1-based index for S function
+            colors.right = getColor(state[S("R", row * 3 + col + 1)]);
           }
         }
 
@@ -199,7 +191,7 @@ function RubiksCube3D({ state }: { state: CubeState }) {
 }
 
 // Scene setup with lighting
-function Scene({ state }: { state: CubeState }) {
+function Scene({ state }: { state: Cube }) {
   return (
     <>
       <color attach="background" args={["#222"]} />
@@ -246,7 +238,7 @@ function App() {
   let [state, setState] = useState<RubiksCubeState>({
     moveHistory: [],
     isSolved: true,
-    state: initialSolvedState,
+    state: solved_cube,
   });
 
   // State to handle ready status

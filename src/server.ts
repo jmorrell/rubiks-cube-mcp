@@ -65,7 +65,6 @@ export class RubiksCubeAgent extends Agent<Env, RubiksCubeState> {
 
   @callable()
   getCubeState() {
-    console.log(this.state);
     return this.state;
   }
 
