@@ -53,7 +53,7 @@ export const solved_cube: Cube = (["U", "R", "F", "D", "L", "B"] as Face[])
 //                 +--+--+--+
 //                 |D7|D8|D9|
 //                 +--+--+--+
-function S(f: Face, i: number): number {
+export function S(f: Face, i: number): number {
   return "URFDLB".indexOf(f) * 9 + i - 1;
 }
 
