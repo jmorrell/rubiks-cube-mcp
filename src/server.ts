@@ -2,8 +2,8 @@ import { Agent, routeAgentRequest, getAgentByName, unstable_callable as callable
 import { McpAgent } from "agents/mcp";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { initialSolvedState, RubiksCube } from "./rubiksCube";
-import type { CubeState } from "./rubiksCube";
+import { RubiksCube, S, solved_cube } from "./rubiksCube";
+import type { Cube, Face } from "./rubiksCube";
 import dedent from "dedent";
 
 type Env = {
@@ -17,20 +17,20 @@ type Env = {
 export type RubiksCubeState = {
   moveHistory: string[];
   isSolved: boolean;
-  state: CubeState;
+  state: Cube;
 };
 
 export type RubiksCubeResponse = {
   moveHistory: string[];
   isSolved: boolean;
-  state: CubeState;
+  state: Cube;
 };
 
 export class RubiksCubeAgent extends Agent<Env, RubiksCubeState> {
   initialState: RubiksCubeState = {
     moveHistory: [],
     isSolved: true,
-    state: initialSolvedState,
+    state: solved_cube,
   };
 
   #getCurrentCube(): RubiksCube {
@@ -73,7 +73,7 @@ export class RubiksCubeAgent extends Agent<Env, RubiksCubeState> {
     this.setState({
       moveHistory: [],
       isSolved: true,
-      state: initialSolvedState,
+      state: solved_cube,
     });
     return this.state;
   }
@@ -104,10 +104,29 @@ export class RubiksCubeMCP extends McpAgent<Env, RubiksCubeMCPState> {
     },
   });
 
-  static renderCubeState(state: CubeState) {
-    return ["U", "F", "R", "B", "L", "D"]
-      .map((side) => {
-        return `${side}: ${state[side as keyof CubeState].map((row) => row.reverse().join(" ")).join(" ")}`;
+  static renderCubeState(cube: Cube) {
+    return (["U", "R", "F", "D", "L", "B"] as Face[])
+      .map((face) => {
+        return (
+          `${face}: ` +
+          cube[S(face, 1)] +
+          " " +
+          cube[S(face, 2)] +
+          " " +
+          cube[S(face, 3)] +
+          " " +
+          cube[S(face, 4)] +
+          " " +
+          cube[S(face, 5)] +
+          " " +
+          cube[S(face, 6)] +
+          " " +
+          cube[S(face, 7)] +
+          " " +
+          cube[S(face, 8)] +
+          " " +
+          cube[S(face, 9)]
+        );
       })
       .join("\n");
   }

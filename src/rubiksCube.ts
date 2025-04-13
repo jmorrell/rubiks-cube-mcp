@@ -27,7 +27,7 @@ function map_face_to_initial_sticker(face: Face): Sticker {
   }
 }
 
-let solved_cube: Cube = (["U", "R", "F", "D", "L", "B"] as Face[])
+export const solved_cube: Cube = (["U", "R", "F", "D", "L", "B"] as Face[])
   .map((s) => map_face_to_initial_sticker(s).repeat(9).split(""))
   .flat() as Cube;
 
@@ -122,11 +122,6 @@ function apply_move(cube: Cube, perm: number[][]): Cube {
   //perm.forEach( ([src, dst]) => new_cube[dst] = cube[src] );
   return new_cube;
 }
-
-// Ensure CubeState explicitly requires all Face keys
-export type CubeState = {
-  [key in Face]: FaceState;
-};
 
 function apply_single_move_to_cube(cube: Cube, move: string): Cube {
   // To implement CCW moves, we can rotate the cube 3 times
