@@ -137,6 +137,18 @@ function applySingleMoveToState(state: CubeState, move: string): CubeState {
     case "B'":
       move = "B";
       break;
+    case "U":
+      move = "U'";
+      break;
+    case "U'":
+      move = "U";
+      break;
+    case "D":
+      move = "D'";
+      break;
+    case "D'":
+      move = "D";
+      break;
   }
 
   const newState = deepCopyState(state);
