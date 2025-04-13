@@ -238,7 +238,7 @@ function App() {
   let [state, setState] = useState<RubiksCubeState>({
     moveHistory: [],
     isSolved: true,
-    state: solved_cube,
+    stateHistory: [solved_cube],
   });
 
   // State to handle ready status
@@ -301,7 +301,7 @@ function App() {
                   dpr={[1, 2]}
                   style={{ width: "100%", height: "100%" }}
                 >
-                  <Scene state={state.state} />
+                  <Scene state={state.stateHistory[state.stateHistory.length - 1]} />
                 </Canvas>
               )}
               {!isReady && <div className="canvas-loading" />}

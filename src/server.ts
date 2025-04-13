@@ -218,7 +218,8 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
   try {
     // Get the cube agent with that ID
     const cubeAgent = await getAgentByName(env.RubiksCubeAgent, cubeId);
-    const state = await cubeAgent.getCubeState();
+    const { stateHistory } = await cubeAgent.getCubeState();
+    const state = stateHistory[stateHistory.length - 1];
 
     // Define colors for the faces - matching with the client's colorMap
     const colorMap: Record<string, string> = {
@@ -283,7 +284,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
         svgContent += `
           <polygon 
             points="${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}" 
-            fill="${colorMap[state.state[S("U", row * 3 + col + 1)]] ?? "#888"}" 
+            fill="${colorMap[state[S("U", row * 3 + col + 1)]] ?? "#888"}" 
             stroke="black" 
             stroke-width="3"
             style="filter:url(#top-lighting)"
@@ -318,7 +319,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
         svgContent += `
           <polygon 
             points="${p1_f[0]},${p1_f[1]} ${p2_f[0]},${p2_f[1]} ${p3_f[0]},${p3_f[1]} ${p4_f[0]},${p4_f[1]}" 
-            fill="${colorMap[state.state[S("F", row * 3 + col + 1)]] ?? "#888"}" 
+            fill="${colorMap[state[S("F", row * 3 + col + 1)]] ?? "#888"}" 
             stroke="black" 
             stroke-width="3"
             style="filter:url(#front-lighting)"
@@ -353,7 +354,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
         svgContent += `
           <polygon 
             points="${p1_r[0]},${p1_r[1]} ${p2_r[0]},${p2_r[1]} ${p3_r[0]},${p3_r[1]} ${p4_r[0]},${p4_r[1]}" 
-            fill="${colorMap[state.state[S("R", row * 3 + col + 1)]] ?? "#888"}" 
+            fill="${colorMap[state[S("R", row * 3 + col + 1)]] ?? "#888"}" 
             stroke="black" 
             stroke-width="3"
             style="filter:url(#right-lighting)"
@@ -390,7 +391,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
         svgContent += `
           <polygon 
             points="${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}" 
-            fill="${colorMap[state.state[S("D", row * 3 + col + 1)]] ?? "#888"}" 
+            fill="${colorMap[state[S("D", row * 3 + col + 1)]] ?? "#888"}" 
             stroke="black" 
             stroke-width="3"
           />
@@ -421,7 +422,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
         svgContent += `
           <polygon 
             points="${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}" 
-            fill="${colorMap[state.state[S("L", row * 3 + col + 1)]] ?? "#888"}" 
+            fill="${colorMap[state[S("L", row * 3 + col + 1)]] ?? "#888"}" 
             stroke="black" 
             stroke-width="3"
           />
@@ -452,7 +453,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
         svgContent += `
           <polygon 
             points="${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}" 
-            fill="${colorMap[state.state[S("B", row * 3 + col + 1)]] ?? "#888"}" 
+            fill="${colorMap[state[S("B", row * 3 + col + 1)]] ?? "#888"}" 
             stroke="black" 
             stroke-width="3"
           />
