@@ -5,6 +5,8 @@ import { z } from "zod";
 import { RubiksCube, S, solved_cube } from "./rubiksCube";
 import type { Cube, Face } from "./rubiksCube";
 import dedent from "dedent";
+import { initialize, svg2png, type ConvertOptions } from "svg2png-wasm";
+import wasm from "svg2png-wasm/svg2png_wasm_bg.wasm";
 
 type Env = {
   RubiksCubeAgent: AgentNamespace<RubiksCubeAgent>;
@@ -214,181 +216,177 @@ export class RubiksCubeMCP extends McpAgent<Env, RubiksCubeMCPState> {
 }
 
 // Render a cube as an SVG in isometric perspective
-async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
-  try {
-    // Get the cube agent with that ID
-    const cubeAgent = await getAgentByName(env.RubiksCubeAgent, cubeId);
-    const { stateHistory } = await cubeAgent.getCubeState();
-    const state = stateHistory[stateHistory.length - 1];
+async function renderCubeAsSvg(cubeId: string, env: Env): Promise<string> {
+  // Get the cube agent with that ID
+  const cubeAgent = await getAgentByName(env.RubiksCubeAgent, cubeId);
+  const { stateHistory } = await cubeAgent.getCubeState();
+  const state = stateHistory[stateHistory.length - 1];
 
-    // Define colors for the faces - matching with the client's colorMap
-    const colorMap: Record<string, string> = {
-      W: "#FFFFFF", // White
-      Y: "#FFFF00", // Yellow
-      B: "#0000FF", // Blue
-      G: "#00FF00", // Green
-      R: "#FF0000", // Red
-      O: "#FFA500", // Orange
-    };
+  // Define colors for the faces - matching with the client's colorMap
+  const colorMap: Record<string, string> = {
+    W: "#FFFFFF", // White
+    Y: "#FFFF00", // Yellow
+    B: "#0000FF", // Blue
+    G: "#00FF00", // Green
+    R: "#FF0000", // Red
+    O: "#FFA500", // Orange
+  };
 
-    // SVG dimensions
-    const singleWidth = 300;
-    const height = 300;
-    const width = singleWidth * 2; // Double width for two views
+  // SVG dimensions
+  const singleWidth = 300;
+  const height = 300;
+  const width = singleWidth * 2; // Double width for two views
 
-    // Isometric projection constants
-    const cubeSize = 120;
-    const centerX1 = singleWidth / 2;
-    const centerY1 = height / 2;
-    const centerX2 = singleWidth + singleWidth / 2;
-    const centerY2 = height / 2;
+  // Isometric projection constants
+  const cubeSize = 120;
+  const centerX1 = singleWidth / 2;
+  const centerY1 = height / 2;
+  const centerX2 = singleWidth + singleWidth / 2;
+  const centerY2 = height / 2;
 
-    // Calculate coordinates for isometric projection
-    // 30 degree isometric angles
-    const cos30 = Math.cos(Math.PI / 6);
-    const sin30 = Math.sin(Math.PI / 6);
+  // Calculate coordinates for isometric projection
+  // 30 degree isometric angles
+  const cos30 = Math.cos(Math.PI / 6);
+  const sin30 = Math.sin(Math.PI / 6);
 
-    // Start building SVG content with filters for lighting effects
-    let svgContent = `
+  // Start building SVG content with filters for lighting effects
+  let svgContent = `
       <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
         <rect width="${width}" height="${height}" fill="#222" />
     `;
 
-    // Helper function to project 3D point to 2D
-    function project(x: number, y: number, z: number, cx: number, cy: number): [number, number] {
-      // Isometric projection
-      const projX = cx + (x - z) * cos30 * cubeSize;
-      const projY = cy + ((x + z) * sin30 - y) * cubeSize; // Revert Y projection
-      return [projX, projY];
-    }
+  // Helper function to project 3D point to 2D
+  function project(x: number, y: number, z: number, cx: number, cy: number): [number, number] {
+    // Isometric projection
+    const projX = cx + (x - z) * cos30 * cubeSize;
+    const projY = cy + ((x + z) * sin30 - y) * cubeSize; // Revert Y projection
+    return [projX, projY];
+  }
 
-    // === Draw First Cube (U, F, R) ===
-    svgContent += `<g id="cube1">`;
+  // === Draw First Cube (U, F, R) ===
+  svgContent += `<g id="cube1">`;
 
-    // Draw the top face (U)
-    svgContent += `<g id="top-face">`;
-    for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < 3; col++) {
-        // Convert row/col to 3D coordinates (x, y, z)
-        const x = (col - 1) / 3;
-        const y = 0.5;
-        const z = (row - 1) / 3;
+  // Draw the top face (U)
+  svgContent += `<g id="top-face">`;
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      // Convert row/col to 3D coordinates (x, y, z)
+      const x = (col - 1) / 3;
+      const y = 0.5;
+      const z = (row - 1) / 3;
 
-        // Calculate four corners of the sticker in isometric projection
-        const p1 = project(x - 1 / 6, y, z - 1 / 6, centerX1, centerY1);
-        const p2 = project(x + 1 / 6, y, z - 1 / 6, centerX1, centerY1);
-        const p3 = project(x + 1 / 6, y, z + 1 / 6, centerX1, centerY1);
-        const p4 = project(x - 1 / 6, y, z + 1 / 6, centerX1, centerY1);
+      // Calculate four corners of the sticker in isometric projection
+      const p1 = project(x - 1 / 6, y, z - 1 / 6, centerX1, centerY1);
+      const p2 = project(x + 1 / 6, y, z - 1 / 6, centerX1, centerY1);
+      const p3 = project(x + 1 / 6, y, z + 1 / 6, centerX1, centerY1);
+      const p4 = project(x - 1 / 6, y, z + 1 / 6, centerX1, centerY1);
 
-        // Create a polygon for the sticker
-        svgContent += `
+      // Create a polygon for the sticker
+      svgContent += `
           <polygon 
             points="${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}" 
             fill="${colorMap[state[S("U", row * 3 + col + 1)]] ?? "#888"}" 
             stroke="black" 
             stroke-width="3"
-            style="filter:url(#top-lighting)"
           />
         `;
-      }
     }
-    svgContent += `</g>`;
+  }
+  svgContent += `</g>`;
 
-    // Add label for Top face
-    const topCenter = project(0, 0.5, 0, centerX1, centerY1);
-    svgContent += `
+  // Add label for Top face
+  const topCenter = project(0, 0.5, 0, centerX1, centerY1);
+  svgContent += `
       <text x="${topCenter[0]}" y="${topCenter[1]}" font-family="sans-serif" font-size="16" fill="white" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="2" paint-order="stroke fill">U</text>
     `;
 
-    // Draw the front face (F)
-    svgContent += `<g id="front-face">`;
-    for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < 3; col++) {
-        // Convert row/col to 3D coordinates (x, y, z)
-        const x = (col - 1) / 3;
-        const y = (1 - row) / 3;
-        const z = 0.5;
+  // Draw the front face (F)
+  svgContent += `<g id="front-face">`;
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      // Convert row/col to 3D coordinates (x, y, z)
+      const x = (col - 1) / 3;
+      const y = (1 - row) / 3;
+      const z = 0.5;
 
-        // Calculate four corners of the sticker in isometric projection
-        const p1_f = project(x - 1 / 6, y - 1 / 6, z, centerX1, centerY1);
-        const p2_f = project(x + 1 / 6, y - 1 / 6, z, centerX1, centerY1);
-        const p3_f = project(x + 1 / 6, y + 1 / 6, z, centerX1, centerY1);
-        const p4_f = project(x - 1 / 6, y + 1 / 6, z, centerX1, centerY1);
+      // Calculate four corners of the sticker in isometric projection
+      const p1_f = project(x - 1 / 6, y - 1 / 6, z, centerX1, centerY1);
+      const p2_f = project(x + 1 / 6, y - 1 / 6, z, centerX1, centerY1);
+      const p3_f = project(x + 1 / 6, y + 1 / 6, z, centerX1, centerY1);
+      const p4_f = project(x - 1 / 6, y + 1 / 6, z, centerX1, centerY1);
 
-        // Create a polygon for the sticker
-        svgContent += `
+      // Create a polygon for the sticker
+      svgContent += `
           <polygon 
             points="${p1_f[0]},${p1_f[1]} ${p2_f[0]},${p2_f[1]} ${p3_f[0]},${p3_f[1]} ${p4_f[0]},${p4_f[1]}" 
             fill="${colorMap[state[S("F", row * 3 + col + 1)]] ?? "#888"}" 
             stroke="black" 
             stroke-width="3"
-            style="filter:url(#front-lighting)"
           />
         `;
-      }
     }
-    svgContent += `</g>`;
+  }
+  svgContent += `</g>`;
 
-    // Add label for Front face
-    const frontCenter = project(0, 0, 0.5, centerX1, centerY1);
-    svgContent += `
+  // Add label for Front face
+  const frontCenter = project(0, 0, 0.5, centerX1, centerY1);
+  svgContent += `
       <text x="${frontCenter[0]}" y="${frontCenter[1]}" font-family="sans-serif" font-size="16" fill="white" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="2" paint-order="stroke fill">F</text>
     `;
 
-    // Draw the right face (R)
-    svgContent += `<g id="right-face">`;
-    for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < 3; col++) {
-        // Convert row/col to 3D coordinates (x, y, z)
-        const x = 0.5;
-        const y = (1 - row) / 3;
-        const z = (1 - col) / 3;
+  // Draw the right face (R)
+  svgContent += `<g id="right-face">`;
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      // Convert row/col to 3D coordinates (x, y, z)
+      const x = 0.5;
+      const y = (1 - row) / 3;
+      const z = (1 - col) / 3;
 
-        // Calculate four corners of the sticker in isometric projection
-        const p1_r = project(x, y - 1 / 6, z - 1 / 6, centerX1, centerY1);
-        const p2_r = project(x, y - 1 / 6, z + 1 / 6, centerX1, centerY1);
-        const p3_r = project(x, y + 1 / 6, z + 1 / 6, centerX1, centerY1);
-        const p4_r = project(x, y + 1 / 6, z - 1 / 6, centerX1, centerY1);
+      // Calculate four corners of the sticker in isometric projection
+      const p1_r = project(x, y - 1 / 6, z - 1 / 6, centerX1, centerY1);
+      const p2_r = project(x, y - 1 / 6, z + 1 / 6, centerX1, centerY1);
+      const p3_r = project(x, y + 1 / 6, z + 1 / 6, centerX1, centerY1);
+      const p4_r = project(x, y + 1 / 6, z - 1 / 6, centerX1, centerY1);
 
-        // Create a polygon for the sticker
-        svgContent += `
+      // Create a polygon for the sticker
+      svgContent += `
           <polygon 
             points="${p1_r[0]},${p1_r[1]} ${p2_r[0]},${p2_r[1]} ${p3_r[0]},${p3_r[1]} ${p4_r[0]},${p4_r[1]}" 
             fill="${colorMap[state[S("R", row * 3 + col + 1)]] ?? "#888"}" 
             stroke="black" 
             stroke-width="3"
-            style="filter:url(#right-lighting)"
           />
         `;
-      }
     }
-    svgContent += `</g>`;
+  }
+  svgContent += `</g>`;
 
-    // Add label for Right face
-    const rightCenter = project(0.5, 0, 0, centerX1, centerY1);
-    svgContent += `
+  // Add label for Right face
+  const rightCenter = project(0.5, 0, 0, centerX1, centerY1);
+  svgContent += `
       <text x="${rightCenter[0]}" y="${rightCenter[1]}" font-family="sans-serif" font-size="16" fill="white" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="2" paint-order="stroke fill">R</text>
     `;
 
-    svgContent += `</g>`; // Close cube1 group
+  svgContent += `</g>`; // Close cube1 group
 
-    // === Draw Second Cube (D, B, L) using U, F, R perspective logic ===
-    svgContent += `<g id="cube2">`;
+  // === Draw Second Cube (D, B, L) using U, F, R perspective logic ===
+  svgContent += `<g id="cube2">`;
 
-    // Draw the down face (D) - using Top face logic
-    svgContent += `<g id="down-face">`;
-    for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < 3; col++) {
-        const x = (1 - row) / 3;
-        const y = -0.5;
-        const z = (col - 1) / 3;
+  // Draw the down face (D) - using Top face logic
+  svgContent += `<g id="down-face">`;
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      const x = (1 - row) / 3;
+      const y = -0.5;
+      const z = (col - 1) / 3;
 
-        const p1 = project(x - 1 / 6, y, z - 1 / 6, centerX2, centerY2);
-        const p2 = project(x + 1 / 6, y, z - 1 / 6, centerX2, centerY2);
-        const p3 = project(x + 1 / 6, y, z + 1 / 6, centerX2, centerY2);
-        const p4 = project(x - 1 / 6, y, z + 1 / 6, centerX2, centerY2);
+      const p1 = project(x - 1 / 6, y, z - 1 / 6, centerX2, centerY2);
+      const p2 = project(x + 1 / 6, y, z - 1 / 6, centerX2, centerY2);
+      const p3 = project(x + 1 / 6, y, z + 1 / 6, centerX2, centerY2);
+      const p4 = project(x - 1 / 6, y, z + 1 / 6, centerX2, centerY2);
 
-        svgContent += `
+      svgContent += `
           <polygon 
             points="${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}" 
             fill="${colorMap[state[S("D", row * 3 + col + 1)]] ?? "#888"}" 
@@ -396,30 +394,30 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
             stroke-width="3"
           />
         `;
-      }
     }
-    svgContent += `</g>`;
+  }
+  svgContent += `</g>`;
 
-    // Add label for Down face
-    const downCenter = project(0, -0.5, 0, centerX2, centerY2);
-    svgContent += `
+  // Add label for Down face
+  const downCenter = project(0, -0.5, 0, centerX2, centerY2);
+  svgContent += `
       <text x="${downCenter[0]}" y="${downCenter[1]}" font-family="sans-serif" font-size="16" fill="black" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="white" stroke-width="0.5" paint-order="stroke fill">D</text>
     `;
 
-    // Draw the left face (L) - using Front face logic
-    svgContent += `<g id="left-face">`;
-    for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < 3; col++) {
-        const x = (col - 1) / 3;
-        const y = (1 - row) / 3;
-        const z = -0.5;
+  // Draw the left face (L) - using Front face logic
+  svgContent += `<g id="left-face">`;
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      const x = (col - 1) / 3;
+      const y = (1 - row) / 3;
+      const z = -0.5;
 
-        const p1 = project(x - 1 / 6, y - 1 / 6, z, centerX2, centerY2);
-        const p2 = project(x + 1 / 6, y - 1 / 6, z, centerX2, centerY2);
-        const p3 = project(x + 1 / 6, y + 1 / 6, z, centerX2, centerY2);
-        const p4 = project(x - 1 / 6, y + 1 / 6, z, centerX2, centerY2);
+      const p1 = project(x - 1 / 6, y - 1 / 6, z, centerX2, centerY2);
+      const p2 = project(x + 1 / 6, y - 1 / 6, z, centerX2, centerY2);
+      const p3 = project(x + 1 / 6, y + 1 / 6, z, centerX2, centerY2);
+      const p4 = project(x - 1 / 6, y + 1 / 6, z, centerX2, centerY2);
 
-        svgContent += `
+      svgContent += `
           <polygon 
             points="${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}" 
             fill="${colorMap[state[S("L", row * 3 + col + 1)]] ?? "#888"}" 
@@ -427,30 +425,30 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
             stroke-width="3"
           />
         `;
-      }
     }
-    svgContent += `</g>`;
+  }
+  svgContent += `</g>`;
 
-    // Add label for Back face
-    const backCenter = project(0, 0, -0.5, centerX2, centerY2);
-    svgContent += `
+  // Add label for Back face
+  const backCenter = project(0, 0, -0.5, centerX2, centerY2);
+  svgContent += `
       <text x="${backCenter[0]}" y="${backCenter[1]}" font-family="sans-serif" font-size="16" fill="white" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="2" paint-order="stroke fill">L</text>
     `;
 
-    // Draw the back face (B) - using Right face logic
-    svgContent += `<g id="back-face">`;
-    for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < 3; col++) {
-        const x = -0.5; // Left face coordinate (position where B is drawn)
-        const y = (1 - row) / 3; // Same y mapping as Right face
-        const z = (1 - col) / 3; // Reversed z mapping
+  // Draw the back face (B) - using Right face logic
+  svgContent += `<g id="back-face">`;
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      const x = -0.5; // Left face coordinate (position where B is drawn)
+      const y = (1 - row) / 3; // Same y mapping as Right face
+      const z = (1 - col) / 3; // Reversed z mapping
 
-        const p1 = project(x, y - 1 / 6, z - 1 / 6, centerX2, centerY2);
-        const p2 = project(x, y - 1 / 6, z + 1 / 6, centerX2, centerY2);
-        const p3 = project(x, y + 1 / 6, z + 1 / 6, centerX2, centerY2);
-        const p4 = project(x, y + 1 / 6, z - 1 / 6, centerX2, centerY2);
+      const p1 = project(x, y - 1 / 6, z - 1 / 6, centerX2, centerY2);
+      const p2 = project(x, y - 1 / 6, z + 1 / 6, centerX2, centerY2);
+      const p3 = project(x, y + 1 / 6, z + 1 / 6, centerX2, centerY2);
+      const p4 = project(x, y + 1 / 6, z - 1 / 6, centerX2, centerY2);
 
-        svgContent += `
+      svgContent += `
           <polygon 
             points="${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}" 
             fill="${colorMap[state[S("B", row * 3 + col + 1)]] ?? "#888"}" 
@@ -458,32 +456,22 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<Response> {
             stroke-width="3"
           />
         `;
-      }
     }
-    svgContent += `</g>`;
+  }
+  svgContent += `</g>`;
 
-    // Add label for Left face
-    const leftCenter = project(-0.5, 0, 0, centerX2, centerY2);
-    svgContent += `
+  // Add label for Left face
+  const leftCenter = project(-0.5, 0, 0, centerX2, centerY2);
+  svgContent += `
       <text x="${leftCenter[0]}" y="${leftCenter[1]}" font-family="sans-serif" font-size="16" fill="white" font-weight="bold" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="2" paint-order="stroke fill">B</text>
     `;
 
-    svgContent += `</g>`; // Close cube2 group
+  svgContent += `</g>`; // Close cube2 group
 
-    // Close the SVG
-    svgContent += `</svg>`;
+  // Close the SVG
+  svgContent += `</svg>`;
 
-    // Return the SVG as a response
-    return new Response(svgContent, {
-      headers: {
-        "Content-Type": "image/svg+xml",
-        "Cache-Control": "max-age=60",
-      },
-    });
-  } catch (error) {
-    console.error("Error rendering SVG:", error);
-    return new Response("Error rendering cube", { status: 500 });
-  }
+  return svgContent;
 }
 
 export default {
@@ -495,7 +483,39 @@ export default {
     if (path.startsWith("/svg/")) {
       const cubeId = path.slice(path.lastIndexOf("/") + 1);
       if (cubeId) {
-        return renderCubeAsSvg(cubeId, env);
+        const svg = await renderCubeAsSvg(cubeId, env);
+        return new Response(svg, {
+          headers: {
+            "Content-Type": "image/svg+xml",
+            "Cache-Control": "max-age=60",
+          },
+        });
+      }
+      return new Response("Invalid cube ID", { status: 400 });
+    }
+
+    if (path.startsWith("/png/")) {
+      initialize(wasm).catch(() => {});
+      const cubeId = path.slice(path.lastIndexOf("/") + 1);
+      // We want to render labels, so we need to use a font
+      // We have the font file in our assets, so we download it from ourselves
+      const roboto = await fetch(`${url.origin}/Roboto-ExtraBold.ttf`).then((res) => res.arrayBuffer());
+      if (cubeId) {
+        const svg = await renderCubeAsSvg(cubeId, env);
+        const buf = await svg2png(svg, {
+          width: 1000,
+          height: 500,
+          fonts: [new Uint8Array(roboto)],
+          defaultFontFamily: {
+            sansSerifFamily: "Roboto",
+          },
+        });
+        return new Response(buf, {
+          headers: {
+            "Content-Type": "image/png",
+            "Cache-Control": "max-age=60",
+          },
+        });
       }
       return new Response("Invalid cube ID", { status: 400 });
     }
