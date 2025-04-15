@@ -93,9 +93,9 @@ const f_move = [
 const b_move = [
   perm_from_cycle([S("B", 1), S("B", 3), S("B", 9), S("B", 7)]),
   perm_from_cycle([S("B", 2), S("B", 6), S("B", 8), S("B", 4)]),
-  perm_from_cycle([S("U", 3), S("L", 1), S("D", 9), S("R", 3)]),
+  perm_from_cycle([S("U", 1), S("L", 7), S("D", 9), S("R", 3)]),
   perm_from_cycle([S("U", 2), S("L", 4), S("D", 8), S("R", 6)]),
-  perm_from_cycle([S("U", 1), S("L", 7), S("D", 7), S("R", 9)]),
+  perm_from_cycle([S("U", 3), S("L", 1), S("D", 7), S("R", 9)]),
 ].flat();
 
 const l_move = [
