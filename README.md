@@ -1,6 +1,6 @@
-# Tic Tac Toe
+# Rubik's Cube MCP
 
-A simple demo showing a smart agent playing Tic Tac Toe against itself.
+An experiment in progress
 
 ## Quick Start
 

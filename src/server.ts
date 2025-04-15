@@ -36,7 +36,7 @@ export class RubiksCubeAgent extends Agent<Env, RubiksCubeState> {
   };
 
   #getCurrentCube(): RubiksCube {
-    return new RubiksCube(this.state.moveHistory.join(" "));
+    return new RubiksCube(this.state.moveHistory.join(" "), this.state.stateHistory[0]);
   }
 
   @callable()
