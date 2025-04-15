@@ -170,9 +170,10 @@ function apply_single_move_to_cube(cube: Cube, move: string): Cube {
 export class RubiksCube {
   private moveHistory: string[] = [];
   // Make initial state truly readonly from outside
-  public readonly initialState: Readonly<Cube> = solved_cube;
+  public readonly initialState: Readonly<Cube>;
 
-  constructor(initialMoves?: string) {
+  constructor(initialMoves?: string, initialState: Cube = solved_cube) {
+    this.initialState = initialState;
     if (initialMoves) {
       this.applyMoveSequence(initialMoves);
     }

@@ -195,24 +195,7 @@ function Scene({ state }: { state: RubiksCubeState }) {
   return (
     <>
       <color attach="background" args={["#222"]} />
-      <ambientLight intensity={0.7} />
-      <hemisphereLight args={["#fff", "#444"]} intensity={0.6} />
-
-      {/* Main key light from top-right */}
-      <directionalLight position={[5, 10, 5]} intensity={0.8} castShadow />
-
-      {/* Strong fill light for bottom face */}
-      <directionalLight position={[-3, -10, 5]} intensity={0.7} />
-
-      {/* Back light */}
-      <directionalLight position={[0, 5, -10]} intensity={0.5} />
-
-      {/* Additional top light */}
-      <pointLight position={[0, 10, 0]} intensity={0.5} distance={15} />
-
-      {/* Additional bottom light */}
-      <pointLight position={[0, -10, 0]} intensity={0.5} distance={15} />
-
+      <ambientLight intensity={2.5} />
       <RubiksCube3D state={state.stateHistory[state.stateHistory.length - 1]} />
       <OrbitControls
         enableZoom={true}
