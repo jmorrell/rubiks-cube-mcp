@@ -503,8 +503,8 @@ export default {
       if (cubeId) {
         const svg = await renderCubeAsSvg(cubeId, env);
         const buf = await svg2png(svg, {
-          width: 1000,
-          height: 500,
+          width: 800,
+          height: 400,
           fonts: [new Uint8Array(roboto)],
           defaultFontFamily: {
             sansSerifFamily: "Roboto",

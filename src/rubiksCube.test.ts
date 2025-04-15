@@ -251,6 +251,40 @@ describe("RubiksCube", () => {
     expect(cube.getStickerAt("R", 9)).toBe("R");
   });
 
+  test("performing the sequence R L B should put the cube into a known scrambled state", () => {
+    const sequence = "R L B";
+    cube.applyMoveSequence(sequence);
+
+    expect(cube.getStickerAt("R", 1)).toBe("R");
+    expect(cube.getStickerAt("R", 2)).toBe("R");
+    expect(cube.getStickerAt("R", 3)).toBe("G");
+    expect(cube.getStickerAt("R", 4)).toBe("R");
+    expect(cube.getStickerAt("R", 5)).toBe("R");
+    expect(cube.getStickerAt("R", 6)).toBe("W");
+    expect(cube.getStickerAt("R", 7)).toBe("R");
+    expect(cube.getStickerAt("R", 8)).toBe("R");
+    expect(cube.getStickerAt("R", 9)).toBe("B");
+
+    expect(cube.getStickerAt("U", 1)).toBe("R");
+    expect(cube.getStickerAt("U", 2)).toBe("R");
+    expect(cube.getStickerAt("U", 3)).toBe("R");
+    expect(cube.getStickerAt("U", 4)).toBe("G");
+    expect(cube.getStickerAt("U", 5)).toBe("Y");
+    expect(cube.getStickerAt("U", 6)).toBe("B");
+    expect(cube.getStickerAt("U", 7)).toBe("G");
+    expect(cube.getStickerAt("U", 8)).toBe("Y");
+    expect(cube.getStickerAt("U", 9)).toBe("B");
+
+    expect(cube.getStickerAt("L", 1)).toBe("B");
+    expect(cube.getStickerAt("L", 2)).toBe("O");
+    expect(cube.getStickerAt("L", 3)).toBe("O");
+    expect(cube.getStickerAt("L", 4)).toBe("Y");
+    expect(cube.getStickerAt("L", 5)).toBe("O");
+    expect(cube.getStickerAt("L", 6)).toBe("O");
+    expect(cube.getStickerAt("L", 7)).toBe("G");
+    expect(cube.getStickerAt("L", 8)).toBe("O");
+  });
+
   test("performing the sequence L D L' D' 3 times should put the cube into a known scrambled state", () => {
     const sequence = "L D L' D'";
     for (let i = 0; i < 3; i++) {
