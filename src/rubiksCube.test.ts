@@ -1,11 +1,6 @@
 import { RubiksCube } from "./rubiksCube";
 import type { Face } from "./rubiksCube";
 
-// Helper for cleaner tests
-function assertCubeIsSolved(cube: RubiksCube, message?: string) {
-  expect(cube.isSolved()).toBe(true);
-}
-
 describe("RubiksCube", () => {
   let cube: RubiksCube;
 
@@ -14,7 +9,7 @@ describe("RubiksCube", () => {
   });
 
   test("should initialize in a solved state", () => {
-    assertCubeIsSolved(cube, "Initial state");
+    expect(cube.isSolved()).toBe(true);
     expect(cube.getMoveHistory()).toEqual([]);
   });
 
@@ -187,7 +182,7 @@ describe("RubiksCube", () => {
     faces.forEach((face) => {
       const cube_ = new RubiksCube(); // Fresh cube for each face test
       cube_.applyMoveSequence(`${face} ${face} ${face} ${face}`);
-      assertCubeIsSolved(cube_, `4x ${face}`);
+      expect(cube.isSolved()).toBe(true);
     });
   });
 
@@ -196,7 +191,7 @@ describe("RubiksCube", () => {
     faces.forEach((face) => {
       const cube_ = new RubiksCube();
       cube_.applyMoveSequence(`${face}2 ${face}2`);
-      assertCubeIsSolved(cube_, `2x ${face}2`);
+      expect(cube.isSolved()).toBe(true);
     });
   });
 
@@ -205,12 +200,12 @@ describe("RubiksCube", () => {
     faces.forEach((face) => {
       const cube_ = new RubiksCube();
       cube_.applyMoveSequence(`${face} ${face}'`);
-      assertCubeIsSolved(cube_, `${face} ${face}'`);
+      expect(cube.isSolved()).toBe(true);
     });
     faces.forEach((face) => {
       const cube_ = new RubiksCube();
       cube_.applyMoveSequence(`${face}' ${face}`);
-      assertCubeIsSolved(cube_, `${face}' ${face}`);
+      expect(cube.isSolved()).toBe(true);
     });
   });
 
@@ -352,7 +347,7 @@ describe("RubiksCube", () => {
     for (let i = 0; i < 6; i++) {
       cube.applyMoveSequence(sequence);
     }
-    assertCubeIsSolved(cube, "(R U R' U') x 6");
+    expect(cube.isSolved()).toBe(true);
   });
 
   test("performing the sequence F B U D L R F B U D L R should NOT return to solved state", () => {
@@ -370,7 +365,7 @@ describe("RubiksCube", () => {
     cube.reset();
 
     expect(cube.getMoveHistory()).toEqual([]);
-    assertCubeIsSolved(cube, "After reset");
+    expect(cube.isSolved()).toBe(true);
   });
 
   test("constructor should accept initial moves", () => {
@@ -383,6 +378,6 @@ describe("RubiksCube", () => {
     cube.applyMoveSequence("R U R' U' R U R' U'"); // Apply part of the cycle
     expect(cube.isSolved()).toBe(false);
     cube.applyMoveSequence("R U R' U' R U R' U' R U R' U' R U R' U'"); // Complete the 6 cycles
-    assertCubeIsSolved(cube, "Solved after (R U R' U') x 6 applied incrementally");
+    expect(cube.isSolved()).toBe(true);
   });
 });

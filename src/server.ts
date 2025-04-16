@@ -152,7 +152,6 @@ export class RubiksCubeMCP extends McpAgent<Env, RubiksCubeMCPState> {
 
         You can view the cube at the following URLs. Be sure to show these to the user:
         Interactive 3D view: http://localhost:5173/${cubeId}
-        SVG image view: http://localhost:5173/svg/${cubeId}
       `;
 
       return {
@@ -163,19 +162,38 @@ export class RubiksCubeMCP extends McpAgent<Env, RubiksCubeMCPState> {
     this.server.tool("getCubeState", "Get the current state of the cube", {}, async () => {
       let cubeAgent = await getAgentByName(self.env.RubiksCubeAgent, self.state.cubeId);
       let state = await cubeAgent.getCubeState();
+
       return {
-        content: [{ type: "text", text: String(RubiksCubeMCP.renderCubeState(state.state)) }],
+        content: [
+          {
+            type: "text",
+            text: dedent`
+              Here is the cube state:
+              ${RubiksCubeMCP.renderCubeState(state.stateHistory[state.stateHistory.length - 1])}
+              
+              The cube is ${state.isSolved ? "solved" : "not solved"}
+            `,
+          },
+        ],
       };
     });
 
     // if passing the ID like this doesn't work, then we can store the cube id in the session state
     this.server.tool(
       "applyMoveSequence",
-      "Apply a sequence of moves to the cube",
+      dedent`
+        Apply a sequence of moves to the cube
+        The moves are a space-separated list of moves.
+        The moves are case-sensitive and must be one of the following:
+        U, R, F, D, L, B, U', R', F', D', L', B'
+
+        Example input: "U R U' R'"
+      `,
       { moves: z.string() },
       async ({ moves }) => {
         let cubeAgent = await getAgentByName(self.env.RubiksCubeAgent, self.state.cubeId);
         let state = await cubeAgent.applyMoveSequence(moves);
+
         return {
           content: [
             {
@@ -187,29 +205,104 @@ export class RubiksCubeMCP extends McpAgent<Env, RubiksCubeMCPState> {
       }
     );
 
-    this.server.tool(
-      "previewMoveSequence",
-      "Preview the result of a sequence of moves without modifying the current cube state",
-      { moves: z.string() },
-      async ({ moves }) => {
-        let cubeAgent = await getAgentByName(self.env.RubiksCubeAgent, self.state.cubeId);
-        let state = await cubeAgent.previewMoveSequence(moves);
-        return {
-          content: [
-            {
-              type: "text",
-              text: String(RubiksCubeMCP.renderCubeState(state.stateHistory[state.stateHistory.length - 1])),
-            },
-          ],
-        };
-      }
-    );
-
-    this.server.tool("isSolved", "Check if the cube is solved", {}, async () => {
-      let cubeAgent = await getAgentByName(self.env.RubiksCubeAgent, self.state.cubeId);
-      let state = await cubeAgent.getCubeState();
+    this.server.prompt("rubiks-cube", "The name of the rubiks cube agent", {}, async () => {
       return {
-        content: [{ type: "text", text: String(state.isSolved) }],
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text: dedent`
+                Let's solve a rubiks cube!
+
+                Each face has 9 positions, numbered as follows:
+
+                1 2 3
+                4 5 6
+                7 8 9
+
+                The mapping assumes the cube is "unrolled" with the Front face (F) towards you:
+
+                           +--+--+--+
+                           |U1|U2|U3|
+                           +--+--+--+
+                           |U4|U5|U6|
+                           +--+--+--+
+                           |U7|U8|U9|
+                +--+--+--+ |--+--+--| |--+--+--| |--+--+--|
+                |L1|L2|L3| |F1|F2|F3| |R1|R2|R3| |B1|B2|B3|
+                +--+--+--+ |--+--+--| |--+--+--| |--+--+--|
+                |L4|L5|L6| |F4|F5|F6| |R4|R5|R6| |B4|B5|B6|
+                +--+--+--+ |--+--+--| |--+--+--| |--+--+--|
+                |L7|L8|L9| |F7|F8|F9| |R7|R8|R9| |B7|B8|B9|
+                +--+--+--+ |--+--+--| |--+--+--| |--+--+--|
+                           |D1|D2|D3|
+                           +--+--+--+
+                           |D4|D5|D6|
+                           +--+--+--+
+                           |D7|D8|D9|
+                           +--+--+--+
+
+              Color Scheme and Orientation
+
+              - U (Up/Top): Yellow (Y)
+              - F (Front): Orange (O)
+              - R (Right): Blue (B)
+              - B (Back): Red (R)
+              - L (Left): Green (G)
+              - D (Down/Bottom): White (W)
+
+              A solved cube would be represented as:
+
+              U: Y Y Y Y Y Y Y Y Y
+              F: O O O O O O O O O
+              R: B B B B B B B B B
+              B: R R R R R R R R R
+              L: G G G G G G G G G
+              D: W W W W W W W W W
+
+              F: Front face clockwise
+              F': Front face counter-clockwise
+              F2: Front face twice (180 degrees)
+              B: Back face clockwise
+              B': Back face counter-clockwise
+              B2: Back face twice
+              U: Top face clockwise
+              U': Top face counter-clockwise
+              U2: Top face twice
+              D: Bottom face clockwise
+              D': Bottom face counter-clockwise
+              D2: Bottom face twice
+              L: Left face clockwise
+              L': Left face counter-clockwise
+              L2: Left face twice
+              R: Right face clockwise
+              R': Right face counter-clockwise
+              R2: Right face twice
+
+              <prompt>
+                You are an beginner rubiks cube solver. 
+                
+                You can request a new scrambled cube by calling the "getScrambledCube" tool. This will return a new cube
+                and also a URL to view the cube. Please show this URL to the user so they can follow along.
+                
+                Rubiks cubes do not respond well to random moves. Take your time, make a plan, and think deeply about
+                the moves you are making.
+
+                This scrambled cube will be one move away from the solved state. You need to analyze the cube and make
+                sure you are confident that the move you are making is going to solve the cube. If it doesn't work, you
+                can make the opposite move to undo it. Ex: if you make an F move, you can undo it with an F' move.
+
+                At each significant step, show the resulting cube state in the face-based notation so I can follow your
+                solution process.
+
+                It's not always clear that you are going to be making progress towards your goal. It may be tempting to 
+                ask for a new scrambled cube. Do not do that! Instead, try to solve the cube from the current state.
+              </prompt>
+              `,
+            },
+          },
+        ],
       };
     });
   }
@@ -475,7 +568,7 @@ async function renderCubeAsSvg(cubeId: string, env: Env): Promise<string> {
 }
 
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
 

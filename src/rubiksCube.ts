@@ -215,12 +215,12 @@ export class RubiksCube {
   isSolved(): boolean {
     let currentState = this.getCurrentState();
 
-    if (currentState.length !== this.initialState.length) {
+    if (currentState.length !== solved_cube.length) {
       return false;
     }
 
     for (let i = 0; i < currentState.length; i++) {
-      if (currentState[i] !== this.initialState[i]) {
+      if (currentState[i] !== solved_cube[i]) {
         return false;
       }
     }

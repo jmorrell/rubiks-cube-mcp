@@ -15,7 +15,7 @@
     "@react-three/drei": "^10.0.5",
     "@react-three/fiber": "^9.1.0",
     "@types/three": "^0.175.0",
-    "agents": "^0.0.45",
+    "agents": "^0.0.60",
     "dedent": "^1.5.3",
     "svg2png-wasm": "^1.4.1",
     "three": "^0.175.0",
